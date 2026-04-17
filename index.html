@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Applied Value AI Global Steel Market</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="side-nav">
+      <div class="nav-brand">
+        <p class="eyebrow">Global AI Steel Intelligence</p>
+        <strong>Applied Value AI Global Steel Market</strong>
+      </div>
+      <div class="nav-links">
+        <button class="nav-link is-active" type="button" data-target="home">Home</button>
+        <button class="nav-link" type="button" data-target="prices">Price Trends</button>
+        <button class="nav-link" type="button" data-target="costs">Cost Drivers</button>
+        <button class="nav-link" type="button" data-target="balance">Supply & Demand</button>
+        <button class="nav-link" type="button" data-target="regional">Regional Delta</button>
+        <button class="nav-link" type="button" data-target="forecast">Forecast</button>
+        <button class="nav-link" type="button" data-target="sensitivity">Industry Sensitivity</button>
+        <button class="nav-link" type="button" data-target="headlines">Headlines</button>
+        <button class="nav-link" type="button" data-target="financials">Financials</button>
+      </div>
+    </aside>
+
+    <div class="content-shell">
+    <section class="hero app-view is-active" data-view="home">
+      <div class="hero-copy">
+        <div class="hero-brandmark">
+          <img
+            src="https://static.wixstatic.com/media/db7ee3_665546242ffa4ab3b330ba4a7e1c1aad~mv2.png/v1/fill/w_272,h_77,al_c,q_85,enc_avif,quality_auto/db7ee3_665546242ffa4ab3b330ba4a7e1c1aad~mv2.png"
+            alt="Applied Value Group logo"
+          >
+          <p class="eyebrow hero-brandtext">AI Steel Intelligence</p>
+        </div>
+        <div class="hero-image-strip" aria-label="Steel industry image gallery">
+          <div class="steel-visual steel-coil" aria-label="Steel coil image">
+            <img src="hero-coil-generated.png" alt="Steel coils">
+          </div>
+          <div class="steel-visual steel-plate" aria-label="Steel plate image">
+            <img src="hero-plate-generated.png" alt="Steel plates">
+          </div>
+          <div class="steel-visual steel-pipe" aria-label="Steel pipe image">
+            <img src="hero-pipe-generated.png" alt="Steel pipes and sections">
+          </div>
+        </div>
+      </div>
+      <div class="hero-panel">
+        <div class="hero-stat"><span>Tracked markets</span><strong>13</strong></div>
+        <div class="hero-stat"><span>Steel grades</span><strong>12</strong></div>
+        <div class="hero-stat"><span>Forecast horizon</span><strong>2027</strong></div>
+      </div>
+    </section>
+
+    <section class="card map-card app-view is-active" data-view="home">
+      <div class="section-topbar">
+        <div>
+          <p class="section-label">Interactive Map</p>
+          <h2>Click a country to open its steel price</h2>
+        </div>
+        <div class="mini-tag">Country-to-price shortcut</div>
+      </div>
+      <div class="map-layout">
+        <div class="world-map" aria-label="Interactive world map of tracked countries">
+          <div class="world-map-stage">
+            <img class="world-map-image" src="world-map.svg" alt="World map">
+            <button class="map-pin map-pin-left" type="button" data-country="USA" style="left:22.8%; top:28.3%;"><span>USA</span></button>
+            <button class="map-pin map-pin-left" type="button" data-country="Brazil" style="left:35.6%; top:55.6%;"><span>Brazil</span></button>
+            <button class="map-pin map-pin-right" type="button" data-country="UK" style="left:49.4%; top:20.0%;"><span>United Kingdom</span></button>
+            <button class="map-pin map-pin-right" type="button" data-country="Germany" style="left:52.9%; top:21.7%;"><span>Germany</span></button>
+            <button class="map-pin map-pin-right" type="button" data-country="Italy" style="left:53.5%; top:26.4%;"><span>Italy</span></button>
+            <button class="map-pin map-pin-right" type="button" data-country="Turkey" style="left:59.7%; top:28.3%;"><span>Turkey</span></button>
+            <button class="map-pin map-pin-right" type="button" data-country="India" style="left:71.7%; top:37.8%;"><span>India</span></button>
+            <button class="map-pin map-pin-right" type="button" data-country="China" style="left:78.9%; top:30.6%;"><span>China</span></button>
+            <button class="map-pin map-pin-right" type="button" data-country="SouthKorea" style="left:85.5%; top:29.8%;"><span>South Korea</span></button>
+            <button class="map-pin map-pin-right" type="button" data-country="Japan" style="left:88.3%; top:29.4%;"><span>Japan</span></button>
+            <button class="map-pin map-pin-left" type="button" data-country="Vietnam" style="left:80.0%; top:41.1%;"><span>Vietnam</span></button>
+            <button class="map-pin map-pin-left" type="button" data-country="Indonesia" style="left:82.8%; top:51.1%;"><span>Indonesia</span></button>
+            <button class="map-pin map-pin-left" type="button" data-country="Australia" style="left:87.2%; top:63.9%;"><span>Australia</span></button>
+          </div>
+        </div>
+        <div class="map-sidebar">
+          <p>Tracked countries on the map:</p>
+          <div class="map-country-list" id="mapCountryList"></div>
+        </div>
+      </div>
+    </section>
+
+    <main class="report-views">
+      <section class="card section-view app-view" data-view="prices">
+        <div class="section-topbar">
+          <div>
+            <p class="section-label">Scenario Controls</p>
+            <h2>Steel Price Trends Across Countries</h2>
+          </div>
+        </div>
+        <div class="controls">
+          <label>Steel type<select id="steelTypeSelect"></select></label>
+          <label>Country<select id="countrySelect"></select></label>
+        </div>
+        <div class="price-focus-panel">
+          <div class="spotlight-card" id="countrySpotlight"></div>
+          <div class="grade-price-list" id="gradePriceList"></div>
+        </div>
+        <div class="kpi-strip" id="priceKpis"></div>
+        <div class="chart-wrap">
+          <div class="chart-header">
+            <span id="trendTitle">Hot Rolled Coil Benchmark Trend</span>
+            <span id="trendMeta">Monthly average, USD/ton</span>
+          </div>
+          <svg id="priceTrendChart" class="chart-svg" viewBox="0 0 760 320" role="img" aria-label="Steel price trend chart"></svg>
+          <div class="legend" id="priceTrendLegend"></div>
+        </div>
+        <div class="time-slider-card">
+          <div class="chart-header">
+            <span id="timeSliderLabel">Visible window</span>
+            <span id="timeSliderMeta">Drag to move through monthly history</span>
+          </div>
+          <input id="timeRangeSlider" class="time-range-slider" type="range" min="0" max="0" step="1" value="0" aria-label="Price trend time window slider">
+        </div>
+        <div class="comparison-block">
+          <div class="section-topbar">
+            <div>
+              <p class="section-label">Cross-Country Comparison</p>
+              <h2>Compare Countries for Selected Steel Grade</h2>
+            </div>
+          </div>
+          <div class="comparison-kpis" id="comparisonKpis"></div>
+          <div class="chart-wrap">
+            <div class="chart-header">
+              <span id="comparisonTitle">Country comparison for selected grade</span>
+              <span id="comparisonMeta">Latest monthly benchmark, USD/ton</span>
+            </div>
+            <svg id="countryComparisonChart" class="chart-svg" viewBox="0 0 760 320" role="img" aria-label="Country comparison chart"></svg>
+            <div class="legend" id="countryComparisonLegend"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card section-view app-view" data-view="costs">
+        <div class="section-topbar">
+          <div>
+            <p class="section-label">Cost Structure</p>
+            <h2>Steel Cost Drivers & Trend</h2>
+          </div>
+        </div>
+        <div class="controls compact-controls">
+          <label>Direction horizon<select id="costHorizonSelect"></select></label>
+        </div>
+        <div class="selection-detail" id="costSourceNote"></div>
+        <div class="driver-bars" id="costDrivers"></div>
+        <div class="financial-chart-grid">
+          <div class="financial-chart-card">
+            <div class="chart-header">
+              <span>Iron Ore</span>
+              <span>USD/dmt</span>
+            </div>
+            <svg id="costIronOreChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="Iron ore trend chart"></svg>
+          </div>
+          <div class="financial-chart-card">
+            <div class="chart-header">
+              <span>Coking Coal</span>
+              <span>USD/mt</span>
+            </div>
+            <svg id="costCokingCoalChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="Coking coal trend chart"></svg>
+          </div>
+          <div class="financial-chart-card">
+            <div class="chart-header">
+              <span>Scrap</span>
+              <span>USD/mt</span>
+            </div>
+            <svg id="costScrapChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="Scrap trend chart"></svg>
+          </div>
+          <div class="financial-chart-card">
+            <div class="chart-header">
+              <span>Electricity</span>
+              <span>Index</span>
+            </div>
+            <svg id="costElectricityChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="Electricity trend chart"></svg>
+          </div>
+          <div class="financial-chart-card">
+            <div class="chart-header">
+              <span>Natural Gas</span>
+              <span>USD/MMBtu</span>
+            </div>
+            <svg id="costNaturalGasChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="Natural gas trend chart"></svg>
+          </div>
+          <div class="financial-chart-card">
+            <div class="chart-header">
+              <span>Freight & Logistics</span>
+              <span>Index</span>
+            </div>
+            <svg id="costFreightChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="Freight and logistics trend chart"></svg>
+          </div>
+        </div>
+        <div class="time-slider-card compact-slider">
+          <div class="chart-header">
+            <span id="costSliderLabel">Visible window</span>
+            <span id="costSliderMeta">Drag to move through monthly cost history</span>
+          </div>
+          <input id="costTimeRangeSlider" class="time-range-slider" type="range" min="0" max="0" step="1" value="0" aria-label="Cost trend time window slider">
+        </div>
+      </section>
+
+      <section class="card section-view app-view" data-view="balance">
+        <div class="section-topbar">
+          <div>
+            <p class="section-label">Balance</p>
+            <h2>Supply & Demand Dynamics</h2>
+          </div>
+        </div>
+        <div class="mini-tag">Capacity, utilization, orders</div>
+        <div class="dynamics-grid" id="dynamicsCards"></div>
+        <div class="selection-detail" id="supplyDemandDetail"></div>
+        <svg id="supplyDemandChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="Supply and demand balance chart"></svg>
+        <div class="time-slider-card compact-slider">
+          <div class="chart-header">
+            <span id="supplySliderLabel">Visible window</span>
+            <span id="supplySliderMeta">Drag to move through monthly supply-demand history</span>
+          </div>
+          <input id="supplyTimeRangeSlider" class="time-range-slider" type="range" min="0" max="0" step="1" value="0" aria-label="Supply and demand time window slider">
+        </div>
+      </section>
+
+      <section class="card section-view app-view" data-view="regional">
+        <div class="section-topbar">
+          <div>
+            <p class="section-label">Regional Pricing</p>
+            <h2>Regional Steel Prices Delta</h2>
+          </div>
+        </div>
+        <div class="mini-tag">vs. global mean</div>
+        <div class="delta-list" id="regionalDelta"></div>
+        <div class="selection-detail" id="regionalDetail"></div>
+        <svg id="regionalTrendChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="Regional delta trend chart"></svg>
+        <div class="time-slider-card compact-slider">
+          <div class="chart-header">
+            <span id="regionalSliderLabel">Visible window</span>
+            <span id="regionalSliderMeta">Drag to move through monthly regional history</span>
+          </div>
+          <input id="regionalTimeRangeSlider" class="time-range-slider" type="range" min="0" max="0" step="1" value="0" aria-label="Regional delta time window slider">
+        </div>
+      </section>
+
+      <section class="card section-view app-view" data-view="forecast">
+        <div class="section-topbar">
+          <div>
+            <p class="section-label">Forward Curve</p>
+            <h2>Steel Price Predictions to 2027</h2>
+          </div>
+        </div>
+        <div class="mini-tag">AI scenario baseline</div>
+        <div class="forecast-summary" id="forecastSummary"></div>
+        <svg id="forecastChart" class="chart-svg compact" viewBox="0 0 520 260" role="img" aria-label="Steel price forecast chart"></svg>
+      </section>
+
+      <section class="card section-view app-view" data-view="sensitivity">
+        <div class="section-topbar">
+          <div>
+            <p class="section-label">Industry Sensitivity</p>
+            <h2>Steel Grade Price Change Impact on COGS</h2>
+          </div>
+        </div>
+        <div class="controls">
+          <label>Steel grade<select id="sensitivityGradeSelect"></select></label>
+          <label>Price move<select id="sensitivityShockSelect"></select></label>
+        </div>
+        <div class="kpi-strip sensitivity-kpis" id="sensitivityKpis"></div>
+        <div class="sensitivity-layout">
+          <div class="sensitivity-list" id="sensitivityList"></div>
+          <div class="card sensitivity-notes">
+            <p class="section-label">Method</p>
+            <h3>How to read this view</h3>
+            <p id="sensitivitySummary"></p>
+            <div class="ratio-notes" id="sensitivityHighlights"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card section-view app-view" data-view="headlines">
+        <div class="section-topbar">
+          <div>
+            <p class="section-label">Market Watch</p>
+            <h2>Major Steel-Relevant Headlines</h2>
+          </div>
+        </div>
+        <div class="mini-tag" id="headlineStatus">Loading live feed</div>
+        <div class="headline-list" id="headlineList"></div>
+      </section>
+
+      <section class="card section-view app-view" data-view="financials">
+        <div class="section-topbar">
+          <div>
+            <p class="section-label">Public Mills</p>
+            <h2>Steel Mills Financial Ratio Performance</h2>
+          </div>
+        </div>
+        <div class="mini-tag">Margin, leverage, liquidity</div>
+        <div class="controls compact-controls">
+          <label>Financial year<select id="financialYearSelect"></select></label>
+        </div>
+        <div class="ratio-table-wrap">
+          <table class="ratio-table">
+            <thead>
+              <tr>
+                <th>Mill</th>
+                <th>Revenue</th>
+                <th>Gross Margin %</th>
+                <th>EBITDA %</th>
+                <th>Debt/EBITDA</th>
+                <th>Current Ratio</th>
+                <th>ROIC %</th>
+              </tr>
+            </thead>
+            <tbody id="ratioTableBody"></tbody>
+          </table>
+        </div>
+        <div class="selection-detail" id="financialDetail"></div>
+        <div class="selection-detail" id="financialSourceNote"></div>
+        <div class="financial-chart-grid">
+          <div class="financial-chart-card">
+            <div class="chart-header">
+              <span>Revenue</span>
+              <span>BUSD</span>
+            </div>
+            <svg id="financialRevenueChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="Revenue trend chart"></svg>
+          </div>
+          <div class="financial-chart-card">
+            <div class="chart-header">
+              <span>Gross Profit Margin</span>
+              <span>%</span>
+            </div>
+            <svg id="financialGrossMarginChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="Gross profit margin trend chart"></svg>
+          </div>
+          <div class="financial-chart-card">
+            <div class="chart-header">
+              <span>EBITDA Margin</span>
+              <span>%</span>
+            </div>
+            <svg id="financialEbitdaChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="EBITDA margin trend chart"></svg>
+          </div>
+          <div class="financial-chart-card">
+            <div class="chart-header">
+              <span>Debt / EBITDA</span>
+              <span>x</span>
+            </div>
+            <svg id="financialDebtChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="Debt to EBITDA trend chart"></svg>
+          </div>
+          <div class="financial-chart-card">
+            <div class="chart-header">
+              <span>Current Ratio</span>
+              <span>x</span>
+            </div>
+            <svg id="financialCurrentChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="Current ratio trend chart"></svg>
+          </div>
+          <div class="financial-chart-card">
+            <div class="chart-header">
+              <span>ROIC</span>
+              <span>%</span>
+            </div>
+            <svg id="financialRoicChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="ROIC trend chart"></svg>
+          </div>
+        </div>
+        <div class="ratio-notes" id="ratioNotes"></div>
+      </section>
+    </main>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

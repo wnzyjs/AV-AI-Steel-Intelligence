@@ -37,7 +37,6 @@
             src="https://static.wixstatic.com/media/db7ee3_665546242ffa4ab3b330ba4a7e1c1aad~mv2.png/v1/fill/w_272,h_77,al_c,q_85,enc_avif,quality_auto/db7ee3_665546242ffa4ab3b330ba4a7e1c1aad~mv2.png"
             alt="Applied Value Group logo"
           >
-          <p class="eyebrow hero-brandtext">AI Steel Intelligence</p>
         </div>
         <div class="hero-image-strip" aria-label="Steel industry image gallery">
           <div class="steel-visual steel-coil" aria-label="Steel coil image">
@@ -235,6 +234,9 @@
             <h2>Regional Steel Prices Delta</h2>
           </div>
         </div>
+        <div class="controls compact-controls">
+          <label>Steel type<select id="regionalSteelTypeSelect"></select></label>
+        </div>
         <div class="mini-tag">vs. global mean</div>
         <div class="delta-list" id="regionalDelta"></div>
         <div class="selection-detail" id="regionalDetail"></div>
@@ -255,9 +257,37 @@
             <h2>Steel Price Predictions to 2027</h2>
           </div>
         </div>
-        <div class="mini-tag">AI scenario baseline</div>
+        <div class="controls compact-controls">
+          <label>Steel type<select id="forecastSteelTypeSelect"></select></label>
+          <label>Country<select id="forecastCountrySelect"></select></label>
+        </div>
+        <div class="mini-tag">Monte Carlo monthly forecast</div>
         <div class="forecast-summary" id="forecastSummary"></div>
+        <div class="selection-detail" id="forecastMethod"></div>
         <svg id="forecastChart" class="chart-svg compact" viewBox="0 0 520 260" role="img" aria-label="Steel price forecast chart"></svg>
+        <div class="forecast-driver-grid">
+          <div class="selection-detail">
+            <p class="section-label">Upward Drivers</p>
+            <div id="forecastUpDrivers"></div>
+          </div>
+          <div class="selection-detail">
+            <p class="section-label">Downward Drivers</p>
+            <div id="forecastDownDrivers"></div>
+          </div>
+        </div>
+        <div class="ratio-table-wrap forecast-table-wrap">
+          <table class="ratio-table">
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>P10</th>
+                <th>P50</th>
+                <th>P90</th>
+              </tr>
+            </thead>
+            <tbody id="forecastMonthTableBody"></tbody>
+          </table>
+        </div>
       </section>
 
       <section class="card section-view app-view" data-view="sensitivity">
@@ -330,6 +360,13 @@
               <span>BUSD</span>
             </div>
             <svg id="financialRevenueChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="Revenue trend chart"></svg>
+          </div>
+          <div class="financial-chart-card">
+            <div class="chart-header">
+              <span>Indexed Stock Performance</span>
+              <span>Base = 100</span>
+            </div>
+            <svg id="financialStockPriceChart" class="chart-svg compact" viewBox="0 0 520 240" role="img" aria-label="Indexed stock performance chart"></svg>
           </div>
           <div class="financial-chart-card">
             <div class="chart-header">

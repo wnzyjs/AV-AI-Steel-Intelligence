@@ -11,6 +11,7 @@ const appState = {
   selectedCostDriver: "Iron Ore",
   selectedSupplyMetric: "Capacity Utilization",
   selectedRegion: "North America",
+  selectedRegionalSteelType: "HRC",
   selectedMill: "ArcelorMittal",
   selectedFinancialYear: "2026"
 };
@@ -241,6 +242,146 @@ function buildLongHistorySeries({
   });
 }
 
+function hashString(value) {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function createSeededRandom(seed) {
+  let state = seed >>> 0;
+  return () => {
+    state += 0x6D2B79F5;
+    let value = state;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function randomNormal(random) {
+  let u = 0;
+  let v = 0;
+  while (u === 0) {
+    u = random();
+  }
+  while (v === 0) {
+    v = random();
+  }
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+function quantile(sortedValues, percentile) {
+  const index = (sortedValues.length - 1) * percentile;
+  const lowerIndex = Math.floor(index);
+  const upperIndex = Math.ceil(index);
+  if (lowerIndex === upperIndex) {
+    return sortedValues[lowerIndex];
+  }
+  const weight = index - lowerIndex;
+  return sortedValues[lowerIndex] * (1 - weight) + sortedValues[upperIndex] * weight;
+}
+
+function getForecastDrivers(steelType, country) {
+  const base = forecastDriverLibrary[steelType] || forecastDriverLibrary.default;
+  const countryBias = {
+    USA: 0.0025,
+    Germany: 0.0015,
+    UK: 0.0012,
+    Italy: 0.0011,
+    India: 0.0022,
+    China: -0.0018,
+    Turkey: -0.0006,
+    Japan: 0.0006,
+    SouthKorea: 0.0003,
+    Brazil: 0.001,
+    Australia: 0.0008
+  };
+
+  const steelBias = {
+    HRC: 0.0018,
+    CR: 0.0015,
+    Plate: 0.0012,
+    "Stainless Steel": 0.0024,
+    HDG: 0.0013,
+    Bar: 0.0009,
+    "Steel Rebar": 0.0009
+  };
+
+  const upsideBias = (countryBias[country] || 0) + (steelBias[steelType] || 0.001);
+  const downsideBias = Math.abs(Math.min(countryBias[country] || 0, 0)) + 0.0016;
+
+  return {
+    upward: base.up,
+    downward: base.down,
+    driftBias: upsideBias - downsideBias * 0.55,
+    volatilityBias: 0.014 + Math.abs(countryBias[country] || 0) * 2.8 + Math.abs(steelBias[steelType] || 0.001) * 1.8
+  };
+}
+
+function getMonteCarloForecast(steelType, country) {
+  const market = getPreferredMarketForCountry(country, steelType);
+  if (!market) {
+    return null;
+  }
+
+  const dataset = priceTrendData[steelType][market.countrySet];
+  const series = dataset.series[country];
+  const historyLabels = dataset.months.slice(-36);
+  const historyValues = series.slice(-36);
+  const lastPrice = historyValues.at(-1);
+  const recentReturns = historyValues.slice(1).map((value, index) => (value - historyValues[index]) / historyValues[index]);
+  const meanReturn = recentReturns.reduce((sum, value) => sum + value, 0) / recentReturns.length;
+  const volatility = Math.sqrt(
+    recentReturns.reduce((sum, value) => sum + ((value - meanReturn) ** 2), 0) / Math.max(recentReturns.length - 1, 1)
+  );
+  const trailing12Change = (historyValues.at(-1) - historyValues.at(-13)) / historyValues.at(-13);
+  const driverContext = getForecastDrivers(steelType, country);
+  const simulations = 600;
+  const meanReversionTarget = lastPrice * (1 + trailing12Change * 0.35 + driverContext.driftBias * 18);
+  const projectionSteps = forecastMonths.length;
+  const monthBuckets = Array.from({ length: projectionSteps }, () => []);
+  const random = createSeededRandom(hashString(`${steelType}-${country}-${lastPrice}`));
+
+  for (let simulation = 0; simulation < simulations; simulation += 1) {
+    let simulatedPrice = lastPrice;
+    for (let step = 0; step < projectionSteps; step += 1) {
+      const shock = randomNormal(random);
+      const seasonal = Math.sin((historyValues.length + step) / 6) * 0.0018;
+      const meanReversion = ((meanReversionTarget - simulatedPrice) / simulatedPrice) * 0.12;
+      const monthlyDrift = meanReturn * 0.55 + trailing12Change / 12 * 0.22 + driverContext.driftBias + seasonal + meanReversion;
+      const monthlyVol = Math.max(volatility * 0.82, driverContext.volatilityBias);
+      const nextReturn = monthlyDrift + monthlyVol * shock;
+      simulatedPrice = Math.max(50, simulatedPrice * (1 + nextReturn));
+      monthBuckets[step].push(simulatedPrice);
+    }
+  }
+
+  const p10 = [];
+  const p50 = [];
+  const p90 = [];
+  monthBuckets.forEach((bucket) => {
+    bucket.sort((left, right) => left - right);
+    p10.push(Number(quantile(bucket, 0.1).toFixed(1)));
+    p50.push(Number(quantile(bucket, 0.5).toFixed(1)));
+    p90.push(Number(quantile(bucket, 0.9).toFixed(1)));
+  });
+
+  return {
+    unit: dataset.unit,
+    historyLabels,
+    historyValues,
+    forecastLabels: forecastMonths,
+    p10,
+    p50,
+    p90,
+    drivers: driverContext
+  };
+}
+
 Object.values(priceTrendData).forEach((countrySets) => {
   Object.values(countrySets).forEach((dataset) => {
     dataset.months = historicalMonths;
@@ -366,57 +507,84 @@ const supplyDemand = {
   demand: buildLongHistorySeries({ latest: 102.6, start: 94.8, precision: 1, seasonalAmplitude: 0.85, cycleAmplitude: 0.55, phase: 0.9, floor: 84 })
 };
 
-const regionalDelta = [
-  {
-    region: "North America",
-    value: 18,
-    description: "Tight sheet capacity and resilient manufacturing mix.",
-    color: "#b84428",
-    history: buildLongHistorySeries({ latest: 18, start: 9, precision: 1, seasonalAmplitude: 1.8, cycleAmplitude: 1.1, phase: 0.2 })
-  },
-  {
-    region: "Europe",
-    value: 7,
-    description: "Carbon costs and slower import arbitrage keep prices supported.",
-    color: "#d47529",
-    history: buildLongHistorySeries({ latest: 7, start: 2.5, precision: 1, seasonalAmplitude: 1.2, cycleAmplitude: 0.8, phase: 0.7 })
-  },
-  {
-    region: "China",
-    value: -11,
-    description: "Export pressure and softer property-linked demand weigh on benchmarks.",
-    color: "#375f42",
-    history: buildLongHistorySeries({ latest: -11, start: -4, precision: 1, seasonalAmplitude: 1.6, cycleAmplitude: 1.2, phase: 1.1 })
-  },
-  {
-    region: "India",
-    value: -4,
-    description: "Capacity additions offset stronger domestic project demand.",
-    color: "#3f7f92",
-    history: buildLongHistorySeries({ latest: -4, start: 0.5, precision: 1, seasonalAmplitude: 1, cycleAmplitude: 0.7, phase: 1.6 })
-  },
-  {
-    region: "Middle East",
-    value: 5,
-    description: "Project steel demand outpaces local rebar and plate output.",
-    color: "#ae8e2c",
-    history: buildLongHistorySeries({ latest: 5, start: 1.2, precision: 1, seasonalAmplitude: 0.9, cycleAmplitude: 0.7, phase: 1.9 })
-  },
-  {
-    region: "Latin America",
-    value: 3,
-    description: "Trade actions and freight support regional premium.",
-    color: "#7b5b8e",
-    history: buildLongHistorySeries({ latest: 3, start: -1.1, precision: 1, seasonalAmplitude: 1.1, cycleAmplitude: 0.8, phase: 2.2 })
-  }
+const regionalDefinitions = [
+  { region: "North America", color: "#b84428", countries: ["USA"], description: "Domestic utilization, trade actions, and manufacturing demand shape the regional premium." },
+  { region: "Europe", color: "#d47529", countries: ["Germany", "UK", "Italy"], description: "Energy, carbon, and import discipline keep Europe moving differently from the world average." },
+  { region: "China", color: "#375f42", countries: ["China"], description: "China remains the largest reference market for export pressure and global steel pricing." },
+  { region: "India", color: "#3f7f92", countries: ["India"], description: "India balances project-led domestic demand against rapid additions in steelmaking capacity." },
+  { region: "Asia Ex-China", color: "#ae8e2c", countries: ["Japan", "SouthKorea", "Vietnam", "Indonesia"], description: "Asian ex-China markets reflect manufacturing, import competition, and semi-finished flows." },
+  { region: "Latin America", color: "#7b5b8e", countries: ["Brazil"], description: "Freight, trade protections, and construction activity shape Latin American price differentials." }
 ];
 
-const forecastData = {
-  labels: ["2024A", "2025E", "2026E", "2027E"],
-  baseline: [690, 728, 751, 774],
-  bullish: [690, 746, 785, 821],
-  downside: [690, 702, 714, 727]
+const forecastDriverLibrary = {
+  default: {
+    up: [
+      { title: "Raw-material pass-through", detail: "Iron ore, coal, scrap, and energy inflation can keep mill offer prices firm when conversion margins tighten." },
+      { title: "Trade protection and outages", detail: "Tariffs, safeguard cases, and maintenance outages can reduce import pressure and tighten local availability." },
+      { title: "Project-led demand", detail: "Infrastructure, grid, shipbuilding, and industrial capex can keep order books resilient even if other sectors soften." }
+    ],
+    down: [
+      { title: "Export competition", detail: "Aggressive exports from oversupplied regions can reset transaction prices lower across spot markets." },
+      { title: "Demand slowdown", detail: "Weaker construction, machinery, or auto output can reduce bookings and extend mill discounting." },
+      { title: "Inventory destocking", detail: "Service center and distributor destocking can amplify price pressure even before end-demand deteriorates materially." }
+    ]
+  },
+  HRC: {
+    up: [
+      { title: "Automotive and appliance restocking", detail: "Flat-steel restocking improves sheet utilization and supports higher spot HRC replacement pricing." },
+      { title: "Trade cases on coated and sheet imports", detail: "Protection against low-priced imports can shift negotiating leverage back to domestic producers." },
+      { title: "Energy and ore cost push", detail: "Higher ore, coal, power, or freight costs tend to lift HRC floor prices." }
+    ],
+    down: [
+      { title: "China export pressure", detail: "Higher exported sheet volumes can cap global HRC recovery and compress arbitrage gaps." },
+      { title: "Manufacturing slowdown", detail: "Lower industrial production reduces service center replenishment and weakens mill pricing power." },
+      { title: "Capacity additions", detail: "New flat-steel capacity can slow margin recovery if demand does not absorb incremental output." }
+    ]
+  },
+  Bar: {
+    up: [
+      { title: "Infrastructure and rebar demand", detail: "Civil works, transport, and public infrastructure projects support long-product consumption." },
+      { title: "Scrap tightness", detail: "Higher scrap costs lift EAF conversion costs and long-product price floors." },
+      { title: "Regional supply constraints", detail: "Construction-led demand spikes can outpace available rebar and merchant bar supply." }
+    ],
+    down: [
+      { title: "Real-estate weakness", detail: "Soft property and residential construction quickly hit long-product order books." },
+      { title: "Import competition", detail: "Cheaper billet and finished long products can pressure domestic transaction prices." },
+      { title: "Seasonal demand pauses", detail: "Weather and project timing can create abrupt monthly slowdowns in construction steel demand." }
+    ]
+  }
 };
+
+function parseMonthLabel(label) {
+  const [monthName, yearText] = label.split("/");
+  return {
+    monthIndex: monthNames.indexOf(monthName),
+    year: Number(yearText)
+  };
+}
+
+function buildForecastMonths(lastHistoricalLabel, endYear, endMonthIndex) {
+  const { monthIndex, year } = parseMonthLabel(lastHistoricalLabel);
+  const labels = [];
+  let currentMonth = monthIndex;
+  let currentYear = year;
+
+  while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonthIndex)) {
+    currentMonth += 1;
+    if (currentMonth >= 12) {
+      currentMonth = 0;
+      currentYear += 1;
+    }
+    if (currentYear > endYear || (currentYear === endYear && currentMonth > endMonthIndex)) {
+      break;
+    }
+    labels.push(`${monthNames[currentMonth]}/${currentYear}`);
+  }
+
+  return labels;
+}
+
+const forecastMonths = buildForecastMonths(historicalMonths.at(-1), 2027, 11);
 
 const headlines = [
   {
@@ -450,6 +618,7 @@ function createMillFinancials({
   sourceLabel = "Public-company reporting aligned estimate",
   quality = "reported"
 }) {
+  const indexedStockBase = Math.max(88, Math.min(152, 100 + (roic - debt * 2.4 + grossMargin * 0.45)));
   return {
     mill,
     revenue,
@@ -458,6 +627,7 @@ function createMillFinancials({
     debt,
     current,
     roic,
+    indexedStockBase,
     sourceLabel,
     quality,
     history: {
@@ -514,6 +684,15 @@ function createMillFinancials({
         cycleAmplitude: 0.45,
         phase: phase + 1.4,
         floor: 1
+      }),
+      stockPerformance: buildLongHistorySeries({
+        latest: indexedStockBase,
+        start: Math.max(indexedStockBase * 0.78, 62),
+        precision: 1,
+        seasonalAmplitude: 2.4,
+        cycleAmplitude: 1.8,
+        phase: phase + 1.7,
+        floor: 55
       })
     }
   };
@@ -574,6 +753,9 @@ const industrySensitivity = [
 
 const steelTypeSelect = document.querySelector("#steelTypeSelect");
 const countrySelect = document.querySelector("#countrySelect");
+const forecastSteelTypeSelect = document.querySelector("#forecastSteelTypeSelect");
+const forecastCountrySelect = document.querySelector("#forecastCountrySelect");
+const regionalSteelTypeSelect = document.querySelector("#regionalSteelTypeSelect");
 const sensitivityGradeSelect = document.querySelector("#sensitivityGradeSelect");
 const sensitivityShockSelect = document.querySelector("#sensitivityShockSelect");
 const timeRangeSlider = document.querySelector("#timeRangeSlider");
@@ -631,6 +813,37 @@ function getMergedCountrySeries(steelType) {
   return { mergedSeries, labels, unit };
 }
 
+function getRegionalDeltaData(steelType) {
+  const { mergedSeries, labels, unit } = getMergedCountrySeries(steelType);
+  const allSeries = Array.from(mergedSeries.values());
+  const globalAverageSeries = labels.map((_, index) => {
+    const values = allSeries.map((series) => series[index]);
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
+  });
+
+  const regions = regionalDefinitions
+    .map((definition) => {
+      const availableCountries = definition.countries.filter((country) => mergedSeries.has(country));
+      if (!availableCountries.length) {
+        return null;
+      }
+      const regionalAverageSeries = labels.map((_, index) => {
+        const values = availableCountries.map((country) => mergedSeries.get(country)[index]);
+        return values.reduce((sum, value) => sum + value, 0) / values.length;
+      });
+      const history = regionalAverageSeries.map((value, index) => ((value - globalAverageSeries[index]) / globalAverageSeries[index]) * 100);
+      return {
+        ...definition,
+        countries: availableCountries,
+        history: history.map((value) => Number(value.toFixed(1))),
+        value: Number(history.at(-1).toFixed(1))
+      };
+    })
+    .filter(Boolean);
+
+  return { labels, unit, regions };
+}
+
 function setCountryFocus(country, steelType = appState.steelType) {
   const matches = getCountryMarkets(country);
   const preferred = matches.find((entry) => entry.steelType === steelType) || matches[0];
@@ -642,6 +855,9 @@ function setCountryFocus(country, steelType = appState.steelType) {
   appState.selectedCountry = country;
   steelTypeSelect.value = appState.steelType;
   countrySelect.value = appState.selectedCountry;
+  forecastSteelTypeSelect.value = appState.steelType;
+  forecastCountrySelect.value = appState.selectedCountry;
+  regionalSteelTypeSelect.value = appState.selectedRegionalSteelType;
   renderPriceSection();
 }
 
@@ -701,6 +917,8 @@ function initControls() {
     option.value = steelType;
     option.textContent = steelType;
     steelTypeSelect.append(option);
+    forecastSteelTypeSelect.append(option.cloneNode(true));
+    regionalSteelTypeSelect.append(option.cloneNode(true));
   });
 
   allCountries.forEach((country) => {
@@ -708,10 +926,14 @@ function initControls() {
     option.value = country;
     option.textContent = readableLabel(country);
     countrySelect.append(option);
+    forecastCountrySelect.append(option.cloneNode(true));
   });
 
   steelTypeSelect.value = appState.steelType;
   countrySelect.value = appState.selectedCountry;
+  forecastSteelTypeSelect.value = appState.steelType;
+  forecastCountrySelect.value = appState.selectedCountry;
+  regionalSteelTypeSelect.value = appState.selectedRegionalSteelType;
 
   steelTypeSelect.addEventListener("change", (event) => {
     appState.steelType = event.target.value;
@@ -723,6 +945,23 @@ function initControls() {
     appState.selectedCountry = event.target.value;
     setCountryFocus(appState.selectedCountry, appState.steelType);
     renderPriceSection();
+  });
+
+  forecastSteelTypeSelect.addEventListener("change", (event) => {
+    appState.steelType = event.target.value;
+    setCountryFocus(appState.selectedCountry, appState.steelType);
+    renderForecast();
+  });
+
+  forecastCountrySelect.addEventListener("change", (event) => {
+    appState.selectedCountry = event.target.value;
+    setCountryFocus(appState.selectedCountry, appState.steelType);
+    renderForecast();
+  });
+
+  regionalSteelTypeSelect.addEventListener("change", (event) => {
+    appState.selectedRegionalSteelType = event.target.value;
+    renderRegionalDelta();
   });
 
   Object.keys(priceTrendData).forEach((steelType) => {
@@ -847,16 +1086,16 @@ function renderPriceSection() {
 
   const dataset = priceTrendData[appState.steelType][market.countrySet];
   const selectedSeries = dataset.series[appState.selectedCountry];
-  const { mergedSeries } = getMergedCountrySeries(appState.steelType);
-  const globalAverageSeries = dataset.months.map((_, index) => {
-    const values = Array.from(mergedSeries.values()).map((series) => series[index]);
-    return values.reduce((sum, value) => sum + value, 0) / values.length;
-  });
   const latestPrice = selectedSeries.at(-1);
   const averagePrice = Math.round(selectedSeries.reduce((sum, value) => sum + value, 0) / selectedSeries.length);
   const lowPrice = Math.min(...selectedSeries);
   const highPrice = Math.max(...selectedSeries);
   const momentum = ((latestPrice - selectedSeries[0]) / selectedSeries[0]) * 100;
+  const { mergedSeries } = getMergedCountrySeries(appState.steelType);
+  const globalAverageSeries = dataset.months.map((_, index) => {
+    const values = Array.from(mergedSeries.values()).map((series) => series[index]);
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
+  });
 
   document.querySelector("#trendTitle").textContent = `${readableLabel(appState.selectedCountry)} ${appState.steelType} price trend`;
   document.querySelector("#trendMeta").textContent = `Monthly average, ${dataset.unit}, Jan/2016-Apr/2026`;
@@ -866,7 +1105,7 @@ function renderPriceSection() {
       <div class="spotlight-copy">
         <p class="section-label">Country Spotlight</p>
         <h3>${readableLabel(appState.selectedCountry)}</h3>
-        <p>${appState.steelType} pricing in ${readableLabel(appState.selectedCountry)} with benchmark comparison to the market average.</p>
+        <p>${appState.steelType} pricing in ${readableLabel(appState.selectedCountry)} with benchmark comparison to the global average.</p>
       </div>
       <div class="spotlight-price">
         <span>Latest price</span>
@@ -924,6 +1163,7 @@ function renderPriceSection() {
     { name: appState.selectedCountry, values: selectedSeries, color: palette[0], active: true },
     { name: "Global average", values: globalAverageSeries, color: palette[1], active: false }
   ];
+  timeRangeSlider.disabled = false;
   updateTimeSlider(dataset.months);
   const visiblePrimary = getVisibleWindow(dataset.months, primarySeries, appState.timeWindowStart);
   drawLineChart({
@@ -942,6 +1182,7 @@ function renderPriceSection() {
   });
 
   renderCountryComparison();
+  renderForecast();
   syncCountryHighlights();
 }
 
@@ -958,7 +1199,7 @@ function renderCountryComparison() {
   const average = Math.round(latestValues.reduce((sum, item) => sum + item.latest, 0) / latestValues.length);
 
   document.querySelector("#comparisonTitle").textContent = `${appState.steelType} country comparison`;
-  document.querySelector("#comparisonMeta").textContent = `Monthly benchmark, ${unit}, Jan/2016-Apr/2026`;
+  document.querySelector("#comparisonMeta").textContent = `Monthly benchmark, ${unit}, last 36 months`;
   document.querySelector("#comparisonKpis").innerHTML = `
     <div class="mini-stat"><span>Countries compared</span><strong>${latestValues.length}</strong><small>${appState.steelType}</small></div>
     <div class="mini-stat"><span>Highest latest market</span><strong>${readableLabel(topCountry.country)}</strong><small>${topCountry.latest} ${unit}</small></div>
@@ -980,16 +1221,17 @@ function renderCountryComparison() {
 
   const comparisonSeries = latestValues.map((item, index) => ({
     name: item.country,
-    values: mergedSeries.get(item.country),
+    values: mergedSeries.get(item.country).slice(-36),
     color: palette[index % palette.length],
     active: item.country === appState.selectedCountry
   }));
-  const visibleComparison = getVisibleWindow(labels, comparisonSeries, appState.timeWindowStart);
   drawLineChart({
     target: document.querySelector("#countryComparisonChart"),
-    labels: visibleComparison.labels,
-    series: visibleComparison.seriesCollection,
-    formatValue: (value) => `${Math.round(value)}`
+    labels: labels.slice(-36),
+    series: comparisonSeries,
+    formatValue: (value) => `${Math.round(value)}`,
+    xLabelFormatter: formatYearTick,
+    xTickFilter: isYearlyTick
   });
 }
 
@@ -1124,9 +1366,14 @@ function renderSupplyDemand() {
 }
 
 function renderRegionalDelta() {
-  const maxAbs = Math.max(...regionalDelta.map((item) => Math.abs(item.value)));
-  const selectedRegion = regionalDelta.find((item) => item.region === appState.selectedRegion) || regionalDelta[0];
-  document.querySelector("#regionalDelta").innerHTML = regionalDelta
+  regionalSteelTypeSelect.value = appState.selectedRegionalSteelType;
+  const regionalData = getRegionalDeltaData(appState.selectedRegionalSteelType);
+  const regions = regionalData.regions;
+  const maxAbs = Math.max(...regions.map((item) => Math.abs(item.value)));
+  const selectedRegion = regions.find((item) => item.region === appState.selectedRegion) || regions[0];
+  appState.selectedRegion = selectedRegion.region;
+
+  document.querySelector("#regionalDelta").innerHTML = regions
     .map(
       (item) => `
         <button class="delta-item ${item.region === appState.selectedRegion ? "is-active" : ""}" type="button" data-region="${item.region}">
@@ -1148,24 +1395,25 @@ function renderRegionalDelta() {
   document.querySelector("#regionalDetail").innerHTML = `
     <p class="section-label">Selected Region</p>
     <h3>${selectedRegion.region}</h3>
-    <p>${selectedRegion.description}</p>
+    <p>${selectedRegion.description} Current view: ${appState.selectedRegionalSteelType} against the global average benchmark.</p>
     <div class="ratio-notes">
       <div class="ratio-note"><span>Delta vs global mean</span><strong>${selectedRegion.value > 0 ? "+" : ""}${selectedRegion.value}%</strong></div>
       <div class="ratio-note"><span>10Y average delta</span><strong>${(selectedRegion.history.reduce((sum, value) => sum + value, 0) / selectedRegion.history.length).toFixed(1)}%</strong></div>
+      <div class="ratio-note"><span>Countries in region</span><strong>${selectedRegion.countries.map(readableLabel).join(", ")}</strong></div>
     </div>
   `;
 
   updateWindowSlider({
-    labels: historicalMonths,
+    labels: regionalData.labels,
     slider: regionalTimeRangeSlider,
     startKey: "regionalTimeWindowStart",
     labelSelector: "#regionalSliderLabel"
   });
   const visibleRegional = getVisibleWindow(
-    historicalMonths,
+    regionalData.labels,
     [
       { name: selectedRegion.region, values: selectedRegion.history, color: selectedRegion.color, active: true },
-      { name: "Global average", values: historicalMonths.map(() => 0), color: "#b59b73", active: false }
+      { name: "Global average", values: regionalData.labels.map(() => 0), color: "#b59b73", active: false }
     ],
     appState.regionalTimeWindowStart
   );
@@ -1185,24 +1433,64 @@ function renderRegionalDelta() {
 }
 
 function renderForecast() {
-  const cagr = (((forecastData.baseline.at(-1) / forecastData.baseline[0]) ** (1 / 3)) - 1) * 100;
-  const spread = forecastData.bullish.at(-1) - forecastData.downside.at(-1);
+  const forecastBundle = getMonteCarloForecast(appState.steelType, appState.selectedCountry);
+  if (!forecastBundle) {
+    return;
+  }
+  const cagr = (((forecastBundle.p50.at(-1) / forecastBundle.historyValues.at(-1)) ** (12 / forecastBundle.forecastLabels.length)) - 1) * 100;
+  const spread = forecastBundle.p90.at(-1) - forecastBundle.p10.at(-1);
+  const lastActual = forecastBundle.historyValues.at(-1);
+  const firstForecast = forecastBundle.forecastLabels[0];
+  const lastForecast = forecastBundle.forecastLabels.at(-1);
+
   document.querySelector("#forecastSummary").innerHTML = `
-    <div class="forecast-pill"><span>Baseline CAGR</span><strong>${cagr.toFixed(1)}%</strong></div>
-    <div class="forecast-pill"><span>2027 Baseline</span><strong>${forecastData.baseline.at(-1)} USD/t</strong></div>
-    <div class="forecast-pill"><span>Scenario range</span><strong>${spread} USD/t</strong></div>
+    <div class="forecast-pill"><span>Selected market</span><strong>${readableLabel(appState.selectedCountry)} ${appState.steelType}</strong></div>
+    <div class="forecast-pill"><span>Annualized median drift</span><strong>${cagr.toFixed(1)}%</strong></div>
+    <div class="forecast-pill"><span>Dec/2027 P50</span><strong>${forecastBundle.p50.at(-1).toFixed(0)} ${forecastBundle.unit}</strong></div>
+    <div class="forecast-pill"><span>Dec/2027 range</span><strong>${forecastBundle.p10.at(-1).toFixed(0)}-${forecastBundle.p90.at(-1).toFixed(0)}</strong></div>
+  `;
+
+  document.querySelector("#forecastMethod").innerHTML = `
+    <p class="section-label">Method</p>
+    <h3>36-month history + Monte Carlo monthly simulation</h3>
+    <p>The model starts from the last actual observation in ${historicalMonths.at(-1)} at ${lastActual.toFixed(0)} ${forecastBundle.unit}, uses the last 36 months of monthly price behavior for drift and volatility, then runs 600 deterministic simulations from ${firstForecast} through ${lastForecast}. The chart shows the 10th, 50th, and 90th percentile paths.</p>
   `;
 
   drawLineChart({
     target: document.querySelector("#forecastChart"),
-    labels: forecastData.labels,
+    labels: [...forecastBundle.historyLabels, ...forecastBundle.forecastLabels],
     series: [
-      { name: "Baseline", values: forecastData.baseline, color: "#375f42" },
-      { name: "Bullish", values: forecastData.bullish, color: "#d47529" },
-      { name: "Downside", values: forecastData.downside, color: "#7b5b8e" }
+      { name: "History", values: [...forecastBundle.historyValues, ...Array(forecastBundle.forecastLabels.length).fill(null)], color: "#375f42", active: true },
+      { name: "P50", values: [...Array(forecastBundle.historyLabels.length).fill(null), ...forecastBundle.p50], color: "#1b1b1b", active: true, dasharray: "10 6", width: 3.6 },
+      { name: "P90", values: [...Array(forecastBundle.historyLabels.length).fill(null), ...forecastBundle.p90], color: "#d47529", active: false, dasharray: "6 6", opacity: 0.75 },
+      { name: "P10", values: [...Array(forecastBundle.historyLabels.length).fill(null), ...forecastBundle.p10], color: "#7b5b8e", active: false, dasharray: "6 6", opacity: 0.75 }
     ],
-    formatValue: (value) => `${Math.round(value)}`
+    formatValue: (value) => `${Math.round(value)}`,
+    xLabelFormatter: formatYearTick,
+    xTickFilter: isYearlyTick
   });
+
+  document.querySelector("#forecastUpDrivers").innerHTML = `
+    <div class="forecast-driver-list">
+      ${forecastBundle.drivers.upward.map((item) => `<div class="forecast-driver-item"><strong>${item.title}</strong><span>${item.detail}</span></div>`).join("")}
+    </div>
+  `;
+  document.querySelector("#forecastDownDrivers").innerHTML = `
+    <div class="forecast-driver-list">
+      ${forecastBundle.drivers.downward.map((item) => `<div class="forecast-driver-item"><strong>${item.title}</strong><span>${item.detail}</span></div>`).join("")}
+    </div>
+  `;
+
+  document.querySelector("#forecastMonthTableBody").innerHTML = forecastBundle.forecastLabels
+    .map((label, index) => `
+      <tr>
+        <td>${label}</td>
+        <td>${forecastBundle.p10[index].toFixed(0)} ${forecastBundle.unit}</td>
+        <td>${forecastBundle.p50[index].toFixed(0)} ${forecastBundle.unit}</td>
+        <td>${forecastBundle.p90[index].toFixed(0)} ${forecastBundle.unit}</td>
+      </tr>
+    `)
+    .join("");
 }
 
 function renderSensitivitySection() {
@@ -1411,6 +1699,7 @@ function renderRatios() {
   const selectedMill = financialRatios.find((row) => row.mill === appState.selectedMill) || financialRatios[0];
   const selectedSnapshot = {
     revenue: selectedMill.history.revenue[snapshotIndex],
+    stockPerformance: selectedMill.history.stockPerformance[snapshotIndex],
     grossMargin: selectedMill.history.grossMargin[snapshotIndex],
     ebitda: selectedMill.history.ebitda[snapshotIndex],
     debt: selectedMill.history.debt[snapshotIndex],
@@ -1421,7 +1710,7 @@ function renderRatios() {
   document.querySelector("#financialDetail").innerHTML = `
     <p class="section-label">Selected Mill</p>
     <h3>${selectedMill.mill}</h3>
-    <p>Selected company financial profile for ${appState.selectedFinancialYear}, using the latest available month in that year (${snapshotLabel}).</p>
+    <p>Selected company financial profile for ${appState.selectedFinancialYear}, using the latest available month in that year (${snapshotLabel}). Indexed stock performance is shown as a directional series with base 100, not as a live quoted share price.</p>
   `;
   document.querySelector("#financialSourceNote").innerHTML = `
     <p class="section-label">Data Quality</p>
@@ -1440,6 +1729,13 @@ function renderRatios() {
       name: "Revenue",
       values: selectedMill.history.revenue,
       color: "#1b1b1b",
+      formatValue: (value) => `${Number(value).toFixed(0)}`
+    },
+    {
+      target: "#financialStockPriceChart",
+      name: "Indexed Stock Performance",
+      values: selectedMill.history.stockPerformance,
+      color: "#b59b73",
       formatValue: (value) => `${Number(value).toFixed(0)}`
     },
     {
@@ -1492,6 +1788,7 @@ function renderRatios() {
 
   document.querySelector("#ratioNotes").innerHTML = `
     <div class="ratio-note"><span>Revenue</span><strong>${selectedSnapshot.revenue.toFixed(1)} BUSD</strong></div>
+    <div class="ratio-note"><span>Indexed stock performance</span><strong>${selectedSnapshot.stockPerformance.toFixed(1)}</strong></div>
     <div class="ratio-note"><span>Gross profit margin</span><strong>${selectedSnapshot.grossMargin.toFixed(1)}%</strong></div>
     <div class="ratio-note"><span>EBITDA margin</span><strong>${selectedSnapshot.ebitda.toFixed(1)}%</strong></div>
     <div class="ratio-note"><span>Debt/EBITDA</span><strong>${selectedSnapshot.debt.toFixed(1)}x</strong></div>
@@ -1513,7 +1810,7 @@ function drawLineChart({ target, labels, series, formatValue, xLabelFormatter, x
   const chartHeight = height - 72;
   const xStart = 56;
   const yStart = 28;
-  const allValues = series.flatMap((item) => item.values);
+  const allValues = series.flatMap((item) => item.values).filter((value) => value !== null && value !== undefined);
   const minValue = Math.min(...allValues);
   const maxValue = Math.max(...allValues);
   const yRange = maxValue - minValue || 1;
@@ -1545,13 +1842,29 @@ function drawLineChart({ target, labels, series, formatValue, xLabelFormatter, x
 
   series.forEach((item) => {
     const points = item.values.map((value, index) => {
+      if (value === null || value === undefined) {
+        return null;
+      }
       const x = xStart + stepX * index;
       const y = yStart + ((maxValue - value) / yRange) * chartHeight;
       return { x, y };
     });
-    const path = points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
-    svg += `<path d="${path}" fill="none" stroke="${item.color}" stroke-width="${item.active ? 4.6 : 2.6}" stroke-opacity="${item.active ? 1 : 0.35}" stroke-linecap="round" stroke-linejoin="round"></path>`;
-    svg += `<circle cx="${points.at(-1).x}" cy="${points.at(-1).y}" r="${item.active ? 6 : 4}" fill="${item.color}" fill-opacity="${item.active ? 1 : 0.5}"></circle>`;
+    let path = "";
+    let segmentOpen = false;
+    points.forEach((point) => {
+      if (!point) {
+        segmentOpen = false;
+        return;
+      }
+      path += !segmentOpen ? `${path ? " " : ""}M ${point.x} ${point.y}` : ` L ${point.x} ${point.y}`;
+      segmentOpen = true;
+    });
+    if (!path) {
+      return;
+    }
+    const lastPoint = [...points].reverse().find(Boolean);
+    svg += `<path d="${path}" fill="none" stroke="${item.color}" stroke-width="${item.width || (item.active ? 4.6 : 2.6)}" stroke-opacity="${item.opacity || (item.active ? 1 : 0.35)}" stroke-dasharray="${item.dasharray || "none"}" stroke-linecap="round" stroke-linejoin="round"></path>`;
+    svg += `<circle cx="${lastPoint.x}" cy="${lastPoint.y}" r="${item.active ? 6 : 4}" fill="${item.color}" fill-opacity="${item.opacity || (item.active ? 1 : 0.5)}"></circle>`;
   });
 
   target.innerHTML = svg;

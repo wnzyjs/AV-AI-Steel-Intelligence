@@ -1,4 +1,4 @@
-const appState = {
+﻿const appState = {
   steelType: "HRC",
   currentView: "home",
   selectedCountry: "China",
@@ -20,384 +20,6 @@ const appState = {
 const palette = ["#375f42", "#d47529", "#b84428", "#ae8e2c", "#3f7f92", "#7b5b8e"];
 
 const countryMarketBias = {
-  USA: 0.0025,
-  Germany: 0.0015,
-  UK: 0.0012,
-  Italy: 0.0011,
-  India: 0.0022,
-  China: -0.0018,
-  Turkey: -0.0006,
-  Japan: 0.0006,
-  SouthKorea: 0.0003,
-  Brazil: 0.001,
-  Australia: 0.0008,
-  Vietnam: 0.0004,
-  Indonesia: 0.0002,
-  Mexico: 0.0009
-};
-
-const countryFlagCodes = {
-  Australia: "AU",
-  Brazil: "BR",
-  China: "CN",
-  Germany: "DE",
-  India: "IN",
-  Indonesia: "ID",
-  Italy: "IT",
-  Japan: "JP",
-  Mexico: "MX",
-  SouthKorea: "KR",
-  Turkey: "TR",
-  UK: "GB",
-  USA: "US",
-  Vietnam: "VN"
-};
-
-const priceTrendData = {
-  HRC: {
-    "Core Markets": {
-      unit: "USD/ton",
-      months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      series: {
-        China: [568, 574, 588, 592, 603, 598, 590, 582, 577, 586, 594, 601],
-        USA: [821, 832, 845, 861, 856, 842, 834, 828, 833, 841, 853, 864],
-        Germany: [712, 718, 726, 733, 741, 735, 728, 722, 719, 723, 731, 739],
-        UK: [724, 731, 739, 745, 752, 747, 741, 734, 730, 736, 744, 751],
-        Italy: [698, 705, 713, 719, 726, 721, 715, 709, 705, 711, 719, 727],
-        India: [634, 640, 648, 656, 662, 659, 651, 646, 641, 649, 656, 668]
-        ,
-        Australia: [681, 687, 695, 701, 708, 703, 698, 692, 688, 694, 701, 709]
-      }
-    },
-    "Asia Focus": {
-      unit: "USD/ton",
-      months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      series: {
-        China: [568, 574, 588, 592, 603, 598, 590, 582, 577, 586, 594, 601],
-        Japan: [689, 693, 700, 708, 714, 707, 699, 692, 687, 690, 697, 705],
-        SouthKorea: [673, 679, 688, 694, 698, 692, 686, 681, 678, 684, 689, 697],
-        India: [634, 640, 648, 656, 662, 659, 651, 646, 641, 649, 656, 668]
-      }
-    }
-  },
-  Bar: {
-    "Core Markets": {
-      unit: "USD/ton",
-      months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      series: {
-        China: [521, 526, 532, 537, 544, 540, 536, 531, 528, 534, 541, 547],
-        USA: [786, 792, 801, 809, 816, 812, 804, 796, 792, 799, 806, 812],
-        Turkey: [609, 616, 625, 631, 639, 634, 629, 622, 619, 624, 631, 638],
-        UK: [621, 627, 634, 639, 646, 641, 636, 630, 626, 632, 638, 644],
-        Italy: [612, 618, 625, 631, 637, 633, 628, 622, 619, 624, 631, 637],
-        India: [582, 588, 594, 602, 610, 606, 599, 592, 589, 596, 602, 608]
-        ,
-        Australia: [596, 602, 609, 615, 621, 617, 612, 607, 603, 609, 615, 622]
-      }
-    },
-    "Asia Focus": {
-      unit: "USD/ton",
-      months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      series: {
-        China: [521, 526, 532, 537, 544, 540, 536, 531, 528, 534, 541, 547],
-        Vietnam: [566, 570, 578, 584, 592, 589, 583, 578, 575, 579, 585, 590],
-        Indonesia: [573, 578, 584, 591, 598, 594, 589, 585, 582, 588, 593, 600],
-        India: [582, 588, 594, 602, 610, 606, 599, 592, 589, 596, 602, 608]
-      }
-    }
-  },
-  CR: {
-    "Core Markets": {
-      unit: "USD/ton",
-      months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      series: {
-        China: [654, 662, 671, 679, 688, 682, 676, 669, 665, 671, 679, 688],
-        USA: [942, 951, 964, 973, 981, 972, 966, 959, 955, 963, 972, 984],
-        Germany: [794, 802, 811, 818, 826, 821, 815, 809, 805, 811, 818, 827],
-        UK: [808, 816, 824, 832, 839, 834, 828, 821, 817, 823, 831, 840],
-        Italy: [781, 789, 798, 805, 813, 808, 802, 796, 792, 799, 806, 814],
-        India: [702, 709, 717, 724, 731, 727, 722, 716, 711, 718, 725, 734]
-        ,
-        Australia: [736, 744, 752, 759, 767, 761, 756, 750, 746, 752, 760, 769]
-      }
-    },
-    "Asia Focus": {
-      unit: "USD/ton",
-      months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      series: {
-        China: [654, 662, 671, 679, 688, 682, 676, 669, 665, 671, 679, 688],
-        Japan: [784, 791, 799, 807, 815, 809, 803, 797, 792, 798, 806, 814],
-        SouthKorea: [768, 775, 783, 791, 798, 792, 787, 781, 777, 782, 790, 798],
-        India: [702, 709, 717, 724, 731, 727, 722, 716, 711, 718, 725, 734]
-      }
-    }
-  },
-  Plate: {
-    "Core Markets": {
-      unit: "USD/ton",
-      months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      series: {
-        China: [624, 629, 637, 643, 650, 647, 641, 635, 631, 638, 646, 654],
-        USA: [889, 896, 905, 914, 922, 917, 911, 904, 899, 907, 915, 926],
-        Germany: [752, 760, 769, 775, 783, 778, 772, 766, 761, 768, 776, 784],
-        UK: [766, 773, 781, 788, 796, 791, 785, 778, 774, 781, 789, 797],
-        Italy: [741, 748, 756, 763, 770, 765, 759, 753, 748, 755, 763, 771],
-        Brazil: [688, 696, 703, 711, 718, 713, 708, 701, 698, 704, 712, 721]
-        ,
-        Australia: [724, 731, 739, 746, 754, 749, 743, 737, 733, 740, 748, 756]
-      }
-    },
-    "Asia Focus": {
-      unit: "USD/ton",
-      months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      series: {
-        China: [624, 629, 637, 643, 650, 647, 641, 635, 631, 638, 646, 654],
-        Japan: [731, 736, 744, 751, 758, 754, 748, 742, 738, 744, 751, 759],
-        SouthKorea: [722, 727, 734, 741, 747, 742, 737, 731, 727, 733, 739, 746],
-        India: [676, 683, 691, 698, 706, 701, 695, 689, 685, 692, 698, 706]
-      }
-    }
-  },
-  "Stainless Steel": {
-    "Core Markets": {
-      unit: "USD/ton",
-      months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      series: {
-        China: [1740, 1758, 1776, 1793, 1810, 1798, 1787, 1773, 1768, 1782, 1798, 1816],
-        USA: [2480, 2502, 2528, 2550, 2572, 2555, 2538, 2514, 2506, 2520, 2542, 2566],
-        Germany: [2210, 2228, 2246, 2261, 2278, 2264, 2251, 2237, 2229, 2241, 2258, 2274],
-        UK: [2264, 2281, 2299, 2315, 2330, 2316, 2303, 2288, 2281, 2294, 2311, 2328],
-        Italy: [2168, 2185, 2202, 2218, 2234, 2221, 2208, 2194, 2188, 2200, 2217, 2233],
-        India: [1896, 1910, 1928, 1944, 1961, 1949, 1937, 1925, 1918, 1932, 1948, 1962]
-        ,
-        Australia: [2058, 2072, 2088, 2103, 2118, 2106, 2094, 2080, 2074, 2086, 2101, 2116]
-      }
-    },
-    "Asia Focus": {
-      unit: "USD/ton",
-      months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      series: {
-        China: [1740, 1758, 1776, 1793, 1810, 1798, 1787, 1773, 1768, 1782, 1798, 1816],
-        Japan: [2082, 2094, 2112, 2127, 2140, 2128, 2116, 2101, 2094, 2107, 2120, 2138],
-        SouthKorea: [2014, 2026, 2043, 2058, 2070, 2058, 2047, 2032, 2026, 2038, 2051, 2068],
-        India: [1896, 1910, 1928, 1944, 1961, 1949, 1937, 1925, 1918, 1932, 1948, 1962]
-      }
-    }
-  },
-  HDG: {
-    "Core Markets": {
-      unit: "USD/ton",
-      months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      series: {
-        China: [394, 401, 407, 412, 419, 416, 410, 404, 401, 405, 411, 418],
-        USA: [452, 460, 468, 474, 482, 478, 471, 465, 462, 468, 474, 481],
-        Turkey: [437, 444, 452, 458, 465, 462, 456, 450, 447, 452, 459, 465],
-        UK: [418, 425, 432, 438, 444, 440, 435, 429, 426, 431, 437, 444],
-        Italy: [426, 433, 440, 446, 452, 448, 443, 437, 434, 439, 445, 451],
-        India: [409, 416, 423, 429, 436, 432, 427, 421, 418, 424, 430, 437]
-        ,
-        Australia: [421, 428, 435, 441, 448, 444, 439, 433, 430, 436, 442, 449]
-      }
-    },
-    "Asia Focus": {
-      unit: "USD/ton",
-      months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      series: {
-        China: [394, 401, 407, 412, 419, 416, 410, 404, 401, 405, 411, 418],
-        Japan: [432, 439, 446, 452, 458, 454, 449, 443, 440, 445, 451, 457],
-        SouthKorea: [426, 433, 440, 446, 453, 449, 444, 438, 435, 440, 446, 452],
-        India: [409, 416, 423, 429, 436, 432, 427, 421, 418, 424, 430, 437]
-      }
-    }
-  }
-};
-
-priceTrendData["Welded Pipe"] = structuredClone(priceTrendData.HDG);
-priceTrendData["Seamless Tube"] = structuredClone(priceTrendData.CR);
-priceTrendData["Silicon Steel"] = structuredClone(priceTrendData["Stainless Steel"]);
-priceTrendData["Tin Plate"] = structuredClone(priceTrendData.CR);
-priceTrendData["Steel Wire"] = structuredClone(priceTrendData.Bar);
-priceTrendData["Steel Rebar"] = structuredClone(priceTrendData.Bar);
-
-function getAllPriceCountries() {
-  return Array.from(
-    new Set(
-      Object.values(priceTrendData)
-        .flatMap((countrySets) => Object.values(countrySets))
-        .flatMap((dataset) => Object.keys(dataset.series))
-    )
-  );
-}
-
-function getCountryReferenceSeries(country) {
-  for (const [steelType, countrySets] of Object.entries(priceTrendData)) {
-    for (const dataset of Object.values(countrySets)) {
-      if (dataset.series[country]) {
-        return { steelType, series: dataset.series[country] };
-      }
-    }
-  }
-  return null;
-}
-
-function averageSeries(seriesCollection) {
-  if (!seriesCollection.length) {
-    return [];
-  }
-
-  return seriesCollection[0].map((_, index) => {
-    const values = seriesCollection.map((series) => series[index]);
-    return values.reduce((sum, value) => sum + value, 0) / values.length;
-  });
-}
-
-function fillMissingPriceCountryCoverage() {
-  const allPriceCountries = getAllPriceCountries();
-
-  Object.entries(priceTrendData).forEach(([steelType, countrySets]) => {
-    const primaryMarketKey = Object.keys(countrySets)[0];
-    const primaryMarket = countrySets[primaryMarketKey];
-    const targetAverageSeries = averageSeries(Object.values(primaryMarket.series));
-    const targetAverageLevel = targetAverageSeries.reduce((sum, value) => sum + value, 0) / targetAverageSeries.length;
-
-    allPriceCountries.forEach((country) => {
-      const alreadyCovered = Object.values(countrySets).some((dataset) => dataset.series[country]);
-      if (alreadyCovered) {
-        return;
-      }
-
-      const reference = getCountryReferenceSeries(country);
-      if (!reference) {
-        return;
-      }
-
-      const referenceAverageSeries = averageSeries(
-        Object.values(priceTrendData[reference.steelType]).flatMap((dataset) => Object.values(dataset.series))
-      );
-      const referenceAverageLevel = referenceAverageSeries.reduce((sum, value) => sum + value, 0) / referenceAverageSeries.length;
-      const countryPremium = reference.series.reduce((sum, value) => sum + value, 0) / reference.series.length / referenceAverageLevel;
-
-      let derivedSeries = targetAverageSeries.map((value, index) => {
-        const referenceIndex = index % reference.series.length;
-        const seasonalTilt = reference.series[referenceIndex] / referenceAverageSeries[referenceIndex];
-        return Math.max(1, Math.round(value * countryPremium * (0.72 + seasonalTilt * 0.28)));
-      });
-
-      const derivedAverageLevel = derivedSeries.reduce((sum, value) => sum + value, 0) / derivedSeries.length;
-      const levelAdjustment = targetAverageLevel * countryPremium / derivedAverageLevel;
-      derivedSeries = derivedSeries.map((value) => Math.max(1, Math.round(value * levelAdjustment)));
-
-      primaryMarket.series[country] = derivedSeries;
-    });
-  });
-}
-
-fillMissingPriceCountryCoverage();
-
-const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const historicalMonths = [];
-for (let year = 2016; year <= 2026; year += 1) {
-  const monthLimit = year === 2026 ? 4 : 12;
-  for (let month = 1; month <= monthLimit; month += 1) {
-    historicalMonths.push(`${monthNames[month - 1]}/${year}`);
-  }
-}
-
-function buildTenYearSeries(monthlyValues) {
-  const totalMonths = historicalMonths.length;
-  const latest = monthlyValues.at(-1);
-  const first = monthlyValues[0];
-  const start = Math.max(first * 0.76, latest * 0.7);
-  const longTrendStep = (latest - start) / Math.max(totalMonths - 1, 1);
-
-  return historicalMonths.map((_, index) => {
-    const seasonalBase = monthlyValues[index % monthlyValues.length];
-    const seasonalOffset = (seasonalBase - first) * 0.45;
-    const cycleOffset = Math.sin((index / 12) * Math.PI) * (latest * 0.015);
-    const value = start + longTrendStep * index + seasonalOffset + cycleOffset;
-    if (index === 0) {
-      return Math.max(1, Math.round(start));
-    }
-    if (index === totalMonths - 1) {
-      return latest;
-    }
-    return Math.max(1, Math.round(value));
-  });
-}
-
-function buildLongHistorySeries({
-  latest,
-  start,
-  precision = 1,
-  seasonalAmplitude = Math.max(Math.abs(latest) * 0.018, 0.6),
-  cycleAmplitude = Math.max(Math.abs(latest) * 0.01, 0.3),
-  phase = 0,
-  floor = null
-}) {
-  const totalMonths = historicalMonths.length;
-  return historicalMonths.map((_, index) => {
-    const progress = index / Math.max(totalMonths - 1, 1);
-    const trend = start + (latest - start) * progress;
-    const seasonal = Math.sin(index / 5 + phase) * seasonalAmplitude;
-    const cycle = Math.cos(index / 13 + phase * 0.5) * cycleAmplitude;
-    const value = trend + seasonal + cycle;
-    const scaled = Number(value.toFixed(precision));
-    if (index === 0) {
-      return floor === null ? Number(start.toFixed(precision)) : Math.max(floor, Number(start.toFixed(precision)));
-    }
-    if (index === totalMonths - 1) {
-      return latest;
-    }
-    return floor === null ? scaled : Math.max(floor, scaled);
-  });
-}
-
-function hashString(value) {
-  let hash = 2166136261;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
-}
-
-function createSeededRandom(seed) {
-  let state = seed >>> 0;
-  return () => {
-    state += 0x6D2B79F5;
-    let value = state;
-    value = Math.imul(value ^ (value >>> 15), value | 1);
-    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
-    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function randomNormal(random) {
-  let u = 0;
-  let v = 0;
-  while (u === 0) {
-    u = random();
-  }
-  while (v === 0) {
-    v = random();
-  }
-  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-}
-
-function quantile(sortedValues, percentile) {
-  const index = (sortedValues.length - 1) * percentile;
-  const lowerIndex = Math.floor(index);
-  const upperIndex = Math.ceil(index);
-  if (lowerIndex === upperIndex) {
-    return sortedValues[lowerIndex];
-  }
-  const weight = index - lowerIndex;
-  return sortedValues[lowerIndex] * (1 - weight) + sortedValues[upperIndex] * weight;
-}
-
-function getForecastDrivers(steelType, country) {
-  const base = forecastDriverLibrary[steelType] || forecastDriverLibrary.default;
-  const countryBias = {
     USA: 0.0025,
     Germany: 0.0015,
     UK: 0.0012,
@@ -408,465 +30,830 @@ function getForecastDrivers(steelType, country) {
     Japan: 0.0006,
     SouthKorea: 0.0003,
     Brazil: 0.001,
-    Australia: 0.0008
+    Australia: 0.0008,
+    Vietnam: 0.0004,
+    Indonesia: 0.0002,
+    Mexico: 0.0009
   };
-
-  const steelBias = {
-    HRC: 0.0018,
-    CR: 0.0015,
-    Plate: 0.0012,
-    "Stainless Steel": 0.0024,
-    HDG: 0.0013,
-    Bar: 0.0009,
-    "Steel Rebar": 0.0009
+  
+  const countryFlagCodes = {
+    Australia: "AU",
+    Brazil: "BR",
+    China: "CN",
+    Germany: "DE",
+    India: "IN",
+    Indonesia: "ID",
+    Italy: "IT",
+    Japan: "JP",
+    Mexico: "MX",
+    SouthKorea: "KR",
+    Turkey: "TR",
+    UK: "GB",
+    USA: "US",
+    Vietnam: "VN"
   };
-
-  const upsideBias = (countryBias[country] || 0) + (steelBias[steelType] || 0.001);
-  const downsideBias = Math.abs(Math.min(countryBias[country] || 0, 0)) + 0.0016;
-
-  return {
-    upward: base.up,
-    downward: base.down,
-    driftBias: upsideBias - downsideBias * 0.55,
-    volatilityBias: 0.014 + Math.abs(countryBias[country] || 0) * 2.8 + Math.abs(steelBias[steelType] || 0.001) * 1.8
+  
+  const priceTrendData = {
+    HRC: {
+      "Core Markets": {
+        unit: "USD/ton",
+        months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        series: {
+          China: [568, 574, 588, 592, 603, 598, 590, 582, 577, 586, 594, 601],
+          USA: [821, 832, 845, 861, 856, 842, 834, 828, 833, 841, 853, 864],
+          Germany: [712, 718, 726, 733, 741, 735, 728, 722, 719, 723, 731, 739],
+          UK: [724, 731, 739, 745, 752, 747, 741, 734, 730, 736, 744, 751],
+          Italy: [698, 705, 713, 719, 726, 721, 715, 709, 705, 711, 719, 727],
+          India: [634, 640, 648, 656, 662, 659, 651, 646, 641, 649, 656, 668]
+          ,
+          Australia: [681, 687, 695, 701, 708, 703, 698, 692, 688, 694, 701, 709]
+        }
+      },
+      "Asia Focus": {
+        unit: "USD/ton",
+        months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        series: {
+          China: [568, 574, 588, 592, 603, 598, 590, 582, 577, 586, 594, 601],
+          Japan: [689, 693, 700, 708, 714, 707, 699, 692, 687, 690, 697, 705],
+          SouthKorea: [673, 679, 688, 694, 698, 692, 686, 681, 678, 684, 689, 697],
+          India: [634, 640, 648, 656, 662, 659, 651, 646, 641, 649, 656, 668]
+        }
+      }
+    },
+    Bar: {
+      "Core Markets": {
+        unit: "USD/ton",
+        months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        series: {
+          China: [521, 526, 532, 537, 544, 540, 536, 531, 528, 534, 541, 547],
+          USA: [786, 792, 801, 809, 816, 812, 804, 796, 792, 799, 806, 812],
+          Turkey: [609, 616, 625, 631, 639, 634, 629, 622, 619, 624, 631, 638],
+          UK: [621, 627, 634, 639, 646, 641, 636, 630, 626, 632, 638, 644],
+          Italy: [612, 618, 625, 631, 637, 633, 628, 622, 619, 624, 631, 637],
+          India: [582, 588, 594, 602, 610, 606, 599, 592, 589, 596, 602, 608]
+          ,
+          Australia: [596, 602, 609, 615, 621, 617, 612, 607, 603, 609, 615, 622]
+        }
+      },
+      "Asia Focus": {
+        unit: "USD/ton",
+        months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        series: {
+          China: [521, 526, 532, 537, 544, 540, 536, 531, 528, 534, 541, 547],
+          Vietnam: [566, 570, 578, 584, 592, 589, 583, 578, 575, 579, 585, 590],
+          Indonesia: [573, 578, 584, 591, 598, 594, 589, 585, 582, 588, 593, 600],
+          India: [582, 588, 594, 602, 610, 606, 599, 592, 589, 596, 602, 608]
+        }
+      }
+    },
+    CR: {
+      "Core Markets": {
+        unit: "USD/ton",
+        months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        series: {
+          China: [654, 662, 671, 679, 688, 682, 676, 669, 665, 671, 679, 688],
+          USA: [942, 951, 964, 973, 981, 972, 966, 959, 955, 963, 972, 984],
+          Germany: [794, 802, 811, 818, 826, 821, 815, 809, 805, 811, 818, 827],
+          UK: [808, 816, 824, 832, 839, 834, 828, 821, 817, 823, 831, 840],
+          Italy: [781, 789, 798, 805, 813, 808, 802, 796, 792, 799, 806, 814],
+          India: [702, 709, 717, 724, 731, 727, 722, 716, 711, 718, 725, 734]
+          ,
+          Australia: [736, 744, 752, 759, 767, 761, 756, 750, 746, 752, 760, 769]
+        }
+      },
+      "Asia Focus": {
+        unit: "USD/ton",
+        months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        series: {
+          China: [654, 662, 671, 679, 688, 682, 676, 669, 665, 671, 679, 688],
+          Japan: [784, 791, 799, 807, 815, 809, 803, 797, 792, 798, 806, 814],
+          SouthKorea: [768, 775, 783, 791, 798, 792, 787, 781, 777, 782, 790, 798],
+          India: [702, 709, 717, 724, 731, 727, 722, 716, 711, 718, 725, 734]
+        }
+      }
+    },
+    Plate: {
+      "Core Markets": {
+        unit: "USD/ton",
+        months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        series: {
+          China: [624, 629, 637, 643, 650, 647, 641, 635, 631, 638, 646, 654],
+          USA: [889, 896, 905, 914, 922, 917, 911, 904, 899, 907, 915, 926],
+          Germany: [752, 760, 769, 775, 783, 778, 772, 766, 761, 768, 776, 784],
+          UK: [766, 773, 781, 788, 796, 791, 785, 778, 774, 781, 789, 797],
+          Italy: [741, 748, 756, 763, 770, 765, 759, 753, 748, 755, 763, 771],
+          Brazil: [688, 696, 703, 711, 718, 713, 708, 701, 698, 704, 712, 721]
+          ,
+          Australia: [724, 731, 739, 746, 754, 749, 743, 737, 733, 740, 748, 756]
+        }
+      },
+      "Asia Focus": {
+        unit: "USD/ton",
+        months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        series: {
+          China: [624, 629, 637, 643, 650, 647, 641, 635, 631, 638, 646, 654],
+          Japan: [731, 736, 744, 751, 758, 754, 748, 742, 738, 744, 751, 759],
+          SouthKorea: [722, 727, 734, 741, 747, 742, 737, 731, 727, 733, 739, 746],
+          India: [676, 683, 691, 698, 706, 701, 695, 689, 685, 692, 698, 706]
+        }
+      }
+    },
+    "Stainless Steel": {
+      "Core Markets": {
+        unit: "USD/ton",
+        months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        series: {
+          China: [1740, 1758, 1776, 1793, 1810, 1798, 1787, 1773, 1768, 1782, 1798, 1816],
+          USA: [2480, 2502, 2528, 2550, 2572, 2555, 2538, 2514, 2506, 2520, 2542, 2566],
+          Germany: [2210, 2228, 2246, 2261, 2278, 2264, 2251, 2237, 2229, 2241, 2258, 2274],
+          UK: [2264, 2281, 2299, 2315, 2330, 2316, 2303, 2288, 2281, 2294, 2311, 2328],
+          Italy: [2168, 2185, 2202, 2218, 2234, 2221, 2208, 2194, 2188, 2200, 2217, 2233],
+          India: [1896, 1910, 1928, 1944, 1961, 1949, 1937, 1925, 1918, 1932, 1948, 1962]
+          ,
+          Australia: [2058, 2072, 2088, 2103, 2118, 2106, 2094, 2080, 2074, 2086, 2101, 2116]
+        }
+      },
+      "Asia Focus": {
+        unit: "USD/ton",
+        months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        series: {
+          China: [1740, 1758, 1776, 1793, 1810, 1798, 1787, 1773, 1768, 1782, 1798, 1816],
+          Japan: [2082, 2094, 2112, 2127, 2140, 2128, 2116, 2101, 2094, 2107, 2120, 2138],
+          SouthKorea: [2014, 2026, 2043, 2058, 2070, 2058, 2047, 2032, 2026, 2038, 2051, 2068],
+          India: [1896, 1910, 1928, 1944, 1961, 1949, 1937, 1925, 1918, 1932, 1948, 1962]
+        }
+      }
+    },
+    HDG: {
+      "Core Markets": {
+        unit: "USD/ton",
+        months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        series: {
+          China: [394, 401, 407, 412, 419, 416, 410, 404, 401, 405, 411, 418],
+          USA: [452, 460, 468, 474, 482, 478, 471, 465, 462, 468, 474, 481],
+          Turkey: [437, 444, 452, 458, 465, 462, 456, 450, 447, 452, 459, 465],
+          UK: [418, 425, 432, 438, 444, 440, 435, 429, 426, 431, 437, 444],
+          Italy: [426, 433, 440, 446, 452, 448, 443, 437, 434, 439, 445, 451],
+          India: [409, 416, 423, 429, 436, 432, 427, 421, 418, 424, 430, 437]
+          ,
+          Australia: [421, 428, 435, 441, 448, 444, 439, 433, 430, 436, 442, 449]
+        }
+      },
+      "Asia Focus": {
+        unit: "USD/ton",
+        months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        series: {
+          China: [394, 401, 407, 412, 419, 416, 410, 404, 401, 405, 411, 418],
+          Japan: [432, 439, 446, 452, 458, 454, 449, 443, 440, 445, 451, 457],
+          SouthKorea: [426, 433, 440, 446, 453, 449, 444, 438, 435, 440, 446, 452],
+          India: [409, 416, 423, 429, 436, 432, 427, 421, 418, 424, 430, 437]
+        }
+      }
+    }
   };
-}
-
-function getMonteCarloForecast(steelType, country) {
-  const market = getPreferredMarketForCountry(country, steelType);
-  if (!market) {
+  
+  priceTrendData["Welded Pipe"] = structuredClone(priceTrendData.HDG);
+  priceTrendData["Seamless Tube"] = structuredClone(priceTrendData.CR);
+  priceTrendData["Silicon Steel"] = structuredClone(priceTrendData["Stainless Steel"]);
+  priceTrendData["Tin Plate"] = structuredClone(priceTrendData.CR);
+  priceTrendData["Steel Wire"] = structuredClone(priceTrendData.Bar);
+  priceTrendData["Steel Rebar"] = structuredClone(priceTrendData.Bar);
+  
+  function getAllPriceCountries() {
+    return Array.from(
+      new Set(
+        Object.values(priceTrendData)
+          .flatMap((countrySets) => Object.values(countrySets))
+          .flatMap((dataset) => Object.keys(dataset.series))
+      )
+    );
+  }
+  
+  function getCountryReferenceSeries(country) {
+    for (const [steelType, countrySets] of Object.entries(priceTrendData)) {
+      for (const dataset of Object.values(countrySets)) {
+        if (dataset.series[country]) {
+          return { steelType, series: dataset.series[country] };
+        }
+      }
+    }
     return null;
   }
-
-  const dataset = priceTrendData[steelType][market.countrySet];
-  const series = dataset.series[country];
-  const historyLabels = dataset.months.slice(-36);
-  const historyValues = series.slice(-36);
-  const lastPrice = historyValues.at(-1);
-  const recentReturns = historyValues.slice(1).map((value, index) => (value - historyValues[index]) / historyValues[index]);
-  const meanReturn = recentReturns.reduce((sum, value) => sum + value, 0) / recentReturns.length;
-  const volatility = Math.sqrt(
-    recentReturns.reduce((sum, value) => sum + ((value - meanReturn) ** 2), 0) / Math.max(recentReturns.length - 1, 1)
-  );
-  const trailing12Change = (historyValues.at(-1) - historyValues.at(-13)) / historyValues.at(-13);
-  const driverContext = getForecastDrivers(steelType, country);
-  const simulations = 600;
-  const meanReversionTarget = lastPrice * (1 + trailing12Change * 0.35 + driverContext.driftBias * 18);
-  const projectionSteps = forecastMonths.length;
-  const monthBuckets = Array.from({ length: projectionSteps }, () => []);
-  const random = createSeededRandom(hashString(`${steelType}-${country}-${lastPrice}`));
-
-  for (let simulation = 0; simulation < simulations; simulation += 1) {
-    let simulatedPrice = lastPrice;
-    for (let step = 0; step < projectionSteps; step += 1) {
-      const shock = randomNormal(random);
-      const seasonal = Math.sin((historyValues.length + step) / 6) * 0.0018;
-      const meanReversion = ((meanReversionTarget - simulatedPrice) / simulatedPrice) * 0.12;
-      const monthlyDrift = meanReturn * 0.55 + trailing12Change / 12 * 0.22 + driverContext.driftBias + seasonal + meanReversion;
-      const monthlyVol = Math.max(volatility * 0.82, driverContext.volatilityBias);
-      const nextReturn = monthlyDrift + monthlyVol * shock;
-      simulatedPrice = Math.max(50, simulatedPrice * (1 + nextReturn));
-      monthBuckets[step].push(simulatedPrice);
+  
+  function averageSeries(seriesCollection) {
+    if (!seriesCollection.length) {
+      return [];
+    }
+  
+    return seriesCollection[0].map((_, index) => {
+      const values = seriesCollection.map((series) => series[index]);
+      return values.reduce((sum, value) => sum + value, 0) / values.length;
+    });
+  }
+  
+  function fillMissingPriceCountryCoverage() {
+    const allPriceCountries = getAllPriceCountries();
+  
+    Object.entries(priceTrendData).forEach(([steelType, countrySets]) => {
+      const primaryMarketKey = Object.keys(countrySets)[0];
+      const primaryMarket = countrySets[primaryMarketKey];
+      const targetAverageSeries = averageSeries(Object.values(primaryMarket.series));
+      const targetAverageLevel = targetAverageSeries.reduce((sum, value) => sum + value, 0) / targetAverageSeries.length;
+  
+      allPriceCountries.forEach((country) => {
+        const alreadyCovered = Object.values(countrySets).some((dataset) => dataset.series[country]);
+        if (alreadyCovered) {
+          return;
+        }
+  
+        const reference = getCountryReferenceSeries(country);
+        if (!reference) {
+          return;
+        }
+  
+        const referenceAverageSeries = averageSeries(
+          Object.values(priceTrendData[reference.steelType]).flatMap((dataset) => Object.values(dataset.series))
+        );
+        const referenceAverageLevel = referenceAverageSeries.reduce((sum, value) => sum + value, 0) / referenceAverageSeries.length;
+        const countryPremium = reference.series.reduce((sum, value) => sum + value, 0) / reference.series.length / referenceAverageLevel;
+  
+        let derivedSeries = targetAverageSeries.map((value, index) => {
+          const referenceIndex = index % reference.series.length;
+          const seasonalTilt = reference.series[referenceIndex] / referenceAverageSeries[referenceIndex];
+          return Math.max(1, Math.round(value * countryPremium * (0.72 + seasonalTilt * 0.28)));
+        });
+  
+        const derivedAverageLevel = derivedSeries.reduce((sum, value) => sum + value, 0) / derivedSeries.length;
+        const levelAdjustment = targetAverageLevel * countryPremium / derivedAverageLevel;
+        derivedSeries = derivedSeries.map((value) => Math.max(1, Math.round(value * levelAdjustment)));
+  
+        primaryMarket.series[country] = derivedSeries;
+      });
+    });
+  }
+  
+  fillMissingPriceCountryCoverage();
+  
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const historicalMonths = [];
+  for (let year = 2016; year <= 2026; year += 1) {
+    const monthLimit = year === 2026 ? 4 : 12;
+    for (let month = 1; month <= monthLimit; month += 1) {
+      historicalMonths.push(`${monthNames[month - 1]}/${year}`);
     }
   }
-
-  const p10 = [];
-  const p50 = [];
-  const p90 = [];
-  monthBuckets.forEach((bucket) => {
-    bucket.sort((left, right) => left - right);
-    p10.push(Number(quantile(bucket, 0.1).toFixed(1)));
-    p50.push(Number(quantile(bucket, 0.5).toFixed(1)));
-    p90.push(Number(quantile(bucket, 0.9).toFixed(1)));
-  });
-
-  return {
-    unit: dataset.unit,
-    historyLabels,
-    historyValues,
-    forecastLabels: forecastMonths,
-    p10,
-    p50,
-    p90,
-    drivers: driverContext
-  };
-}
-
-Object.values(priceTrendData).forEach((countrySets) => {
-  Object.values(countrySets).forEach((dataset) => {
-    dataset.months = historicalMonths;
-    Object.keys(dataset.series).forEach((country) => {
-      dataset.series[country] = buildTenYearSeries(dataset.series[country]);
+  
+  function buildTenYearSeries(monthlyValues) {
+    const totalMonths = historicalMonths.length;
+    const latest = monthlyValues.at(-1);
+    const first = monthlyValues[0];
+    const start = Math.max(first * 0.76, latest * 0.7);
+    const longTrendStep = (latest - start) / Math.max(totalMonths - 1, 1);
+  
+    return historicalMonths.map((_, index) => {
+      const seasonalBase = monthlyValues[index % monthlyValues.length];
+      const seasonalOffset = (seasonalBase - first) * 0.45;
+      const cycleOffset = Math.sin((index / 12) * Math.PI) * (latest * 0.015);
+      const value = start + longTrendStep * index + seasonalOffset + cycleOffset;
+      if (index === 0) {
+        return Math.max(1, Math.round(start));
+      }
+      if (index === totalMonths - 1) {
+        return latest;
+      }
+      return Math.max(1, Math.round(value));
+    });
+  }
+  
+  function buildLongHistorySeries({
+    latest,
+    start,
+    precision = 1,
+    seasonalAmplitude = Math.max(Math.abs(latest) * 0.018, 0.6),
+    cycleAmplitude = Math.max(Math.abs(latest) * 0.01, 0.3),
+    phase = 0,
+    floor = null
+  }) {
+    const totalMonths = historicalMonths.length;
+    return historicalMonths.map((_, index) => {
+      const progress = index / Math.max(totalMonths - 1, 1);
+      const trend = start + (latest - start) * progress;
+      const seasonal = Math.sin(index / 5 + phase) * seasonalAmplitude;
+      const cycle = Math.cos(index / 13 + phase * 0.5) * cycleAmplitude;
+      const value = trend + seasonal + cycle;
+      const scaled = Number(value.toFixed(precision));
+      if (index === 0) {
+        return floor === null ? Number(start.toFixed(precision)) : Math.max(floor, Number(start.toFixed(precision)));
+      }
+      if (index === totalMonths - 1) {
+        return latest;
+      }
+      return floor === null ? scaled : Math.max(floor, scaled);
+    });
+  }
+  
+  function hashString(value) {
+    let hash = 2166136261;
+    for (let index = 0; index < value.length; index += 1) {
+      hash ^= value.charCodeAt(index);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  }
+  
+  function createSeededRandom(seed) {
+    let state = seed >>> 0;
+    return () => {
+      state += 0x6D2B79F5;
+      let value = state;
+      value = Math.imul(value ^ (value >>> 15), value | 1);
+      value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+      return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  
+  function randomNormal(random) {
+    let u = 0;
+    let v = 0;
+    while (u === 0) {
+      u = random();
+    }
+    while (v === 0) {
+      v = random();
+    }
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+  
+  function quantile(sortedValues, percentile) {
+    const index = (sortedValues.length - 1) * percentile;
+    const lowerIndex = Math.floor(index);
+    const upperIndex = Math.ceil(index);
+    if (lowerIndex === upperIndex) {
+      return sortedValues[lowerIndex];
+    }
+    const weight = index - lowerIndex;
+    return sortedValues[lowerIndex] * (1 - weight) + sortedValues[upperIndex] * weight;
+  }
+  
+  function getForecastDrivers(steelType, country) {
+    const base = forecastDriverLibrary[steelType] || forecastDriverLibrary.default;
+    const countryBias = {
+      USA: 0.0025,
+      Germany: 0.0015,
+      UK: 0.0012,
+      Italy: 0.0011,
+      India: 0.0022,
+      China: -0.0018,
+      Turkey: -0.0006,
+      Japan: 0.0006,
+      SouthKorea: 0.0003,
+      Brazil: 0.001,
+      Australia: 0.0008
+    };
+  
+    const steelBias = {
+      HRC: 0.0018,
+      CR: 0.0015,
+      Plate: 0.0012,
+      "Stainless Steel": 0.0024,
+      HDG: 0.0013,
+      Bar: 0.0009,
+      "Steel Rebar": 0.0009
+    };
+  
+    const upsideBias = (countryBias[country] || 0) + (steelBias[steelType] || 0.001);
+    const downsideBias = Math.abs(Math.min(countryBias[country] || 0, 0)) + 0.0016;
+  
+    return {
+      upward: base.up,
+      downward: base.down,
+      driftBias: upsideBias - downsideBias * 0.55,
+      volatilityBias: 0.014 + Math.abs(countryBias[country] || 0) * 2.8 + Math.abs(steelBias[steelType] || 0.001) * 1.8
+    };
+  }
+  
+  function getMonteCarloForecast(steelType, country) {
+    const market = getPreferredMarketForCountry(country, steelType);
+    if (!market) {
+      return null;
+    }
+  
+    const dataset = priceTrendData[steelType][market.countrySet];
+    const series = dataset.series[country];
+    const historyLabels = dataset.months.slice(-36);
+    const historyValues = series.slice(-36);
+    const lastPrice = historyValues.at(-1);
+    const recentReturns = historyValues.slice(1).map((value, index) => (value - historyValues[index]) / historyValues[index]);
+    const meanReturn = recentReturns.reduce((sum, value) => sum + value, 0) / recentReturns.length;
+    const volatility = Math.sqrt(
+      recentReturns.reduce((sum, value) => sum + ((value - meanReturn) ** 2), 0) / Math.max(recentReturns.length - 1, 1)
+    );
+    const trailing12Change = (historyValues.at(-1) - historyValues.at(-13)) / historyValues.at(-13);
+    const driverContext = getForecastDrivers(steelType, country);
+    const simulations = 600;
+    const meanReversionTarget = lastPrice * (1 + trailing12Change * 0.35 + driverContext.driftBias * 18);
+    const projectionSteps = forecastMonths.length;
+    const monthBuckets = Array.from({ length: projectionSteps }, () => []);
+    const random = createSeededRandom(hashString(`${steelType}-${country}-${lastPrice}`));
+  
+    for (let simulation = 0; simulation < simulations; simulation += 1) {
+      let simulatedPrice = lastPrice;
+      for (let step = 0; step < projectionSteps; step += 1) {
+        const shock = randomNormal(random);
+        const seasonal = Math.sin((historyValues.length + step) / 6) * 0.0018;
+        const meanReversion = ((meanReversionTarget - simulatedPrice) / simulatedPrice) * 0.12;
+        const monthlyDrift = meanReturn * 0.55 + trailing12Change / 12 * 0.22 + driverContext.driftBias + seasonal + meanReversion;
+        const monthlyVol = Math.max(volatility * 0.82, driverContext.volatilityBias);
+        const nextReturn = monthlyDrift + monthlyVol * shock;
+        simulatedPrice = Math.max(50, simulatedPrice * (1 + nextReturn));
+        monthBuckets[step].push(simulatedPrice);
+      }
+    }
+  
+    const p10 = [];
+    const p50 = [];
+    const p90 = [];
+    monthBuckets.forEach((bucket) => {
+      bucket.sort((left, right) => left - right);
+      p10.push(Number(quantile(bucket, 0.1).toFixed(1)));
+      p50.push(Number(quantile(bucket, 0.5).toFixed(1)));
+      p90.push(Number(quantile(bucket, 0.9).toFixed(1)));
+    });
+  
+    return {
+      unit: dataset.unit,
+      historyLabels,
+      historyValues,
+      forecastLabels: forecastMonths,
+      p10,
+      p50,
+      p90,
+      drivers: driverContext
+    };
+  }
+  
+  Object.values(priceTrendData).forEach((countrySets) => {
+    Object.values(countrySets).forEach((dataset) => {
+      dataset.months = historicalMonths;
+      Object.keys(dataset.series).forEach((country) => {
+        dataset.series[country] = buildTenYearSeries(dataset.series[country]);
+      });
     });
   });
-});
-
-appState.timeWindowStart = Math.max(historicalMonths.length - appState.timeWindowSize, 0);
-appState.costTimeWindowStart = appState.timeWindowStart;
-appState.supplyTimeWindowStart = appState.timeWindowStart;
-appState.regionalTimeWindowStart = appState.timeWindowStart;
-
-const costDrivers = [
-  {
-    name: "Iron Ore",
-    value: 74,
-    color: "#375f42",
-    benchmark: "62% Fe fines CFR China",
-    unit: "USD/dmt",
-    sourceLabel: "IMF / public benchmark proxy",
-    quality: "benchmark"
-  },
-  {
-    name: "Coking Coal",
-    value: 66,
-    color: "#d47529",
-    benchmark: "Premium hard coking coal FOB Australia",
-    unit: "USD/mt",
-    sourceLabel: "IMF / public benchmark proxy",
-    quality: "benchmark"
-  },
-  {
-    name: "Scrap",
-    value: 58,
-    color: "#3f7f92",
-    benchmark: "HMS 1/2 import benchmark proxy",
-    unit: "USD/mt",
-    sourceLabel: "Modeled from public scrap benchmarks",
-    quality: "modeled"
-  },
-  {
-    name: "Electricity",
-    value: 63,
-    color: "#b84428",
-    benchmark: "Industrial power cost proxy",
-    unit: "index",
-    sourceLabel: "Modeled utility-cost proxy",
-    quality: "modeled"
-  },
-  {
-    name: "Natural Gas",
-    value: 49,
-    color: "#ae8e2c",
-    benchmark: "Natural gas benchmark proxy",
-    unit: "USD/MMBtu",
-    sourceLabel: "IMF / public benchmark proxy",
-    quality: "benchmark"
-  },
-  {
-    name: "Freight & Logistics",
-    value: 56,
-    color: "#7b5b8e",
-    benchmark: "Ocean and inland freight proxy",
-    unit: "index",
-    sourceLabel: "Modeled logistics-cost proxy",
-    quality: "modeled"
-  }
-];
-
-const costHorizonOptions = [
-  { label: "12M", value: "12M", points: 12 },
-  { label: "3Y", value: "3Y", points: 36 },
-  { label: "5Y", value: "5Y", points: 60 },
-  { label: "10Y", value: "10Y", points: 120 }
-];
-
-const costTrend = {
-  labels: historicalMonths,
-  series: {
-    "Iron Ore": buildLongHistorySeries({ latest: 104.2, start: 55.3, precision: 1, seasonalAmplitude: 4.4, cycleAmplitude: 6.1, phase: 0.4, floor: 35 }),
-    "Coking Coal": buildLongHistorySeries({ latest: 232.5, start: 91.6, precision: 1, seasonalAmplitude: 11.5, cycleAmplitude: 18.4, phase: 0.8, floor: 60 }),
-    Scrap: buildLongHistorySeries({ latest: 389.0, start: 238.0, precision: 1, seasonalAmplitude: 9.5, cycleAmplitude: 12.6, phase: 1.1, floor: 180 }),
-    Electricity: buildLongHistorySeries({ latest: 128.0, start: 92.0, precision: 1, seasonalAmplitude: 3.1, cycleAmplitude: 4.8, phase: 0.5, floor: 70 }),
-    "Natural Gas": buildLongHistorySeries({ latest: 2.1, start: 2.7, precision: 1, seasonalAmplitude: 0.25, cycleAmplitude: 0.35, phase: 1.4, floor: 1.2 }),
-    "Freight & Logistics": buildLongHistorySeries({ latest: 112.0, start: 84.0, precision: 1, seasonalAmplitude: 2.6, cycleAmplitude: 4.2, phase: 1.8, floor: 60 })
-  }
-};
-
-const supplyDemand = {
-  stats: [
+  
+  appState.timeWindowStart = Math.max(historicalMonths.length - appState.timeWindowSize, 0);
+  appState.costTimeWindowStart = appState.timeWindowStart;
+  appState.supplyTimeWindowStart = appState.timeWindowStart;
+  appState.regionalTimeWindowStart = appState.timeWindowStart;
+  
+  const costDrivers = [
     {
-      label: "Capacity Utilization",
-      note: "Global mills still below prior-cycle peak.",
-      unit: "%",
-      decimals: 1,
-      latest: 78.6,
-      series: buildLongHistorySeries({ latest: 78.6, start: 71.8, precision: 1, seasonalAmplitude: 1.2, cycleAmplitude: 0.7, phase: 0.4, floor: 60 }),
-      color: "#375f42"
+      name: "Iron Ore",
+      value: 74,
+      color: "#375f42",
+      benchmark: "62% Fe fines CFR China",
+      unit: "USD/dmt",
+      sourceLabel: "IMF / public benchmark proxy",
+      quality: "benchmark"
     },
     {
-      label: "Inventories",
-      note: "Service center cover easing in North America.",
-      unit: "days",
-      decimals: 0,
-      latest: 42,
-      series: buildLongHistorySeries({ latest: 42, start: 55, precision: 0, seasonalAmplitude: 2.1, cycleAmplitude: 1.2, phase: 0.8, floor: 20 }),
-      color: "#d47529"
+      name: "Coking Coal",
+      value: 66,
+      color: "#d47529",
+      benchmark: "Premium hard coking coal FOB Australia",
+      unit: "USD/mt",
+      sourceLabel: "IMF / public benchmark proxy",
+      quality: "benchmark"
     },
     {
-      label: "Order Books",
-      note: "Automotive and infrastructure remain resilient.",
-      unit: "weeks",
-      decimals: 1,
-      latest: 7.4,
-      series: buildLongHistorySeries({ latest: 7.4, start: 5.6, precision: 1, seasonalAmplitude: 0.22, cycleAmplitude: 0.12, phase: 1.2, floor: 3.5 }),
-      color: "#3f7f92"
+      name: "Scrap",
+      value: 58,
+      color: "#3f7f92",
+      benchmark: "HMS 1/2 import benchmark proxy",
+      unit: "USD/mt",
+      sourceLabel: "Modeled from public scrap benchmarks",
+      quality: "modeled"
+    },
+    {
+      name: "Electricity",
+      value: 63,
+      color: "#b84428",
+      benchmark: "Industrial power cost proxy",
+      unit: "index",
+      sourceLabel: "Modeled utility-cost proxy",
+      quality: "modeled"
+    },
+    {
+      name: "Natural Gas",
+      value: 49,
+      color: "#ae8e2c",
+      benchmark: "Natural gas benchmark proxy",
+      unit: "USD/MMBtu",
+      sourceLabel: "IMF / public benchmark proxy",
+      quality: "benchmark"
+    },
+    {
+      name: "Freight & Logistics",
+      value: 56,
+      color: "#7b5b8e",
+      benchmark: "Ocean and inland freight proxy",
+      unit: "index",
+      sourceLabel: "Modeled logistics-cost proxy",
+      quality: "modeled"
     }
-  ],
-  labels: historicalMonths,
-  supply: buildLongHistorySeries({ latest: 103.4, start: 96.1, precision: 1, seasonalAmplitude: 0.9, cycleAmplitude: 0.5, phase: 0.3, floor: 85 }),
-  demand: buildLongHistorySeries({ latest: 102.6, start: 94.8, precision: 1, seasonalAmplitude: 0.85, cycleAmplitude: 0.55, phase: 0.9, floor: 84 })
-};
-
-function deriveCountrySeries(values, country, { precision = 1, floor = null, amplitude = 1 } = {}) {
-  const bias = countryMarketBias[country] || 0;
-  return values.map((value, index) => {
-    const wave = Math.sin(index / 7 + country.length * 0.35) * amplitude;
-    const adjusted = value * (1 + bias * 8) + wave;
-    const scaled = Number(adjusted.toFixed(precision));
-    return floor === null ? scaled : Math.max(floor, scaled);
-  });
-}
-
-function getSupplyDemandDataset(country) {
-  return {
-    labels: supplyDemand.labels,
-    supply: deriveCountrySeries(supplyDemand.supply, country, { precision: 1, floor: 85, amplitude: 0.8 }),
-    demand: deriveCountrySeries(supplyDemand.demand, country, { precision: 1, floor: 84, amplitude: 0.8 }),
-    stats: supplyDemand.stats.map((stat, index) => {
-      const countrySeries = deriveCountrySeries(stat.series, country, {
-        precision: stat.decimals,
-        floor: stat.unit === "%" ? 55 : stat.unit === "days" ? 18 : 3,
-        amplitude: index === 0 ? 0.45 : index === 1 ? 1.4 : 0.12
-      });
-      const latest = countrySeries.at(-1);
-      const countryLabel = readableLabel(country);
-      const countryNoteMap = {
-        "Capacity Utilization": `${countryLabel} mill utilization versus the long-cycle baseline.`,
-        Inventories: `${countryLabel} distributor and service-center cover trend.`,
-        "Order Books": `${countryLabel} downstream booking visibility and project confidence.`
-      };
-      return {
-        ...stat,
-        note: countryNoteMap[stat.label] || stat.note,
-        latest,
-        series: countrySeries
-      };
-    })
+  ];
+  
+  const costHorizonOptions = [
+    { label: "12M", value: "12M", points: 12 },
+    { label: "3Y", value: "3Y", points: 36 },
+    { label: "5Y", value: "5Y", points: 60 },
+    { label: "10Y", value: "10Y", points: 120 }
+  ];
+  
+  const costTrend = {
+    labels: historicalMonths,
+    series: {
+      "Iron Ore": buildLongHistorySeries({ latest: 104.2, start: 55.3, precision: 1, seasonalAmplitude: 4.4, cycleAmplitude: 6.1, phase: 0.4, floor: 35 }),
+      "Coking Coal": buildLongHistorySeries({ latest: 232.5, start: 91.6, precision: 1, seasonalAmplitude: 11.5, cycleAmplitude: 18.4, phase: 0.8, floor: 60 }),
+      Scrap: buildLongHistorySeries({ latest: 389.0, start: 238.0, precision: 1, seasonalAmplitude: 9.5, cycleAmplitude: 12.6, phase: 1.1, floor: 180 }),
+      Electricity: buildLongHistorySeries({ latest: 128.0, start: 92.0, precision: 1, seasonalAmplitude: 3.1, cycleAmplitude: 4.8, phase: 0.5, floor: 70 }),
+      "Natural Gas": buildLongHistorySeries({ latest: 2.1, start: 2.7, precision: 1, seasonalAmplitude: 0.25, cycleAmplitude: 0.35, phase: 1.4, floor: 1.2 }),
+      "Freight & Logistics": buildLongHistorySeries({ latest: 112.0, start: 84.0, precision: 1, seasonalAmplitude: 2.6, cycleAmplitude: 4.2, phase: 1.8, floor: 60 })
+    }
   };
-}
-
-const regionalDefinitions = [
-  { region: "North America", color: "#b84428", countries: ["USA"], description: "Domestic utilization, trade actions, and manufacturing demand shape the regional premium." },
-  { region: "Europe", color: "#d47529", countries: ["Germany", "UK", "Italy"], description: "Energy, carbon, and import discipline keep Europe moving differently from the world average." },
-  { region: "China", color: "#375f42", countries: ["China"], description: "China remains the largest reference market for export pressure and global steel pricing." },
-  { region: "India", color: "#3f7f92", countries: ["India"], description: "India balances project-led domestic demand against rapid additions in steelmaking capacity." },
-  { region: "Asia Ex-China", color: "#ae8e2c", countries: ["Japan", "SouthKorea", "Vietnam", "Indonesia"], description: "Asian ex-China markets reflect manufacturing, import competition, and semi-finished flows." },
-  { region: "Latin America", color: "#7b5b8e", countries: ["Brazil"], description: "Freight, trade protections, and construction activity shape Latin American price differentials." }
-];
-
-const forecastDriverLibrary = {
-  default: {
-    up: [
-      { title: "Raw-material pass-through", detail: "Iron ore, coal, scrap, and energy inflation can keep mill offer prices firm when conversion margins tighten." },
-      { title: "Trade protection and outages", detail: "Tariffs, safeguard cases, and maintenance outages can reduce import pressure and tighten local availability." },
-      { title: "Project-led demand", detail: "Infrastructure, grid, shipbuilding, and industrial capex can keep order books resilient even if other sectors soften." }
+  
+  const supplyDemand = {
+    stats: [
+      {
+        label: "Capacity Utilization",
+        note: "Global mills still below prior-cycle peak.",
+        unit: "%",
+        decimals: 1,
+        latest: 78.6,
+        series: buildLongHistorySeries({ latest: 78.6, start: 71.8, precision: 1, seasonalAmplitude: 1.2, cycleAmplitude: 0.7, phase: 0.4, floor: 60 }),
+        color: "#375f42"
+      },
+      {
+        label: "Inventories",
+        note: "Service center cover easing in North America.",
+        unit: "days",
+        decimals: 0,
+        latest: 42,
+        series: buildLongHistorySeries({ latest: 42, start: 55, precision: 0, seasonalAmplitude: 2.1, cycleAmplitude: 1.2, phase: 0.8, floor: 20 }),
+        color: "#d47529"
+      },
+      {
+        label: "Order Books",
+        note: "Automotive and infrastructure remain resilient.",
+        unit: "weeks",
+        decimals: 1,
+        latest: 7.4,
+        series: buildLongHistorySeries({ latest: 7.4, start: 5.6, precision: 1, seasonalAmplitude: 0.22, cycleAmplitude: 0.12, phase: 1.2, floor: 3.5 }),
+        color: "#3f7f92"
+      }
     ],
-    down: [
-      { title: "Export competition", detail: "Aggressive exports from oversupplied regions can reset transaction prices lower across spot markets." },
-      { title: "Demand slowdown", detail: "Weaker construction, machinery, or auto output can reduce bookings and extend mill discounting." },
-      { title: "Inventory destocking", detail: "Service center and distributor destocking can amplify price pressure even before end-demand deteriorates materially." }
-    ]
-  },
-  HRC: {
-    up: [
-      { title: "Automotive and appliance restocking", detail: "Flat-steel restocking improves sheet utilization and supports higher spot HRC replacement pricing." },
-      { title: "Trade cases on coated and sheet imports", detail: "Protection against low-priced imports can shift negotiating leverage back to domestic producers." },
-      { title: "Energy and ore cost push", detail: "Higher ore, coal, power, or freight costs tend to lift HRC floor prices." }
-    ],
-    down: [
-      { title: "China export pressure", detail: "Higher exported sheet volumes can cap global HRC recovery and compress arbitrage gaps." },
-      { title: "Manufacturing slowdown", detail: "Lower industrial production reduces service center replenishment and weakens mill pricing power." },
-      { title: "Capacity additions", detail: "New flat-steel capacity can slow margin recovery if demand does not absorb incremental output." }
-    ]
-  },
-  Bar: {
-    up: [
-      { title: "Infrastructure and rebar demand", detail: "Civil works, transport, and public infrastructure projects support long-product consumption." },
-      { title: "Scrap tightness", detail: "Higher scrap costs lift EAF conversion costs and long-product price floors." },
-      { title: "Regional supply constraints", detail: "Construction-led demand spikes can outpace available rebar and merchant bar supply." }
-    ],
-    down: [
-      { title: "Real-estate weakness", detail: "Soft property and residential construction quickly hit long-product order books." },
-      { title: "Import competition", detail: "Cheaper billet and finished long products can pressure domestic transaction prices." },
-      { title: "Seasonal demand pauses", detail: "Weather and project timing can create abrupt monthly slowdowns in construction steel demand." }
-    ]
-  }
-};
-
-const steelWikiData = {
-  HRC: {
-    title: "Hot Rolled Coil",
-    summary: "The base flat-steel benchmark for industrial manufacturing, service centers, pipe, and downstream coated products.",
-    definition: "Hot Rolled Coil is produced by rolling semi-finished steel at high temperature, creating a versatile coil product with scale on the surface and relatively looser tolerances than cold-rolled grades.",
-    production: ["Primarily produced through blast furnace-basic oxygen furnace or EAF flat-rolling routes.", "Serves as the starting substrate for cold-rolled, galvanized, and pipe products.", "Lead times and utilization rates often make HRC the main benchmark for flat-steel cycles."],
-    applications: ["Structural components and general fabrication", "Pipe and tube feedstock", "Machinery, transport equipment, and service-center distribution"],
-    drivers: ["Iron ore, coal, scrap, and energy conversion costs", "Manufacturing demand and auto/appliance restocking", "Import competition, tariffs, and mill utilization rates"]
-  },
-  CR: {
-    title: "Cold Rolled Coil",
-    summary: "A thinner, more precise flat product used where tighter tolerances, improved finish, and formability matter.",
-    definition: "Cold Rolled Coil is made by pickling and cold reducing hot-rolled substrate, producing a smoother surface and more consistent thickness control.",
-    production: ["Built from HRC feedstock via tandem cold mills.", "Often annealed and tempered to achieve target mechanical properties.", "Common precursor for exposed automotive and appliance sheet."],
-    applications: ["Automotive exposed panels and stampings", "Home appliances and office furniture", "Precision tubing and engineered components"],
-    drivers: ["HRC substrate cost plus cold-reduction premium", "Auto and appliance demand", "Coating line availability and downstream restocking"]
-  },
-  Plate: {
-    title: "Steel Plate",
-    summary: "A heavier-gauge flat product tied closely to infrastructure, shipbuilding, pressure vessels, and heavy equipment.",
-    definition: "Steel Plate refers to thick flat steel rolled into discrete plate dimensions, typically above sheet and coil gauge ranges.",
-    production: ["Produced on plate mills from slabs or ingots.", "Can include normalized, quenched and tempered, or pressure-vessel grades.", "Typically less commoditized than benchmark coil products."],
-    applications: ["Shipbuilding and offshore structures", "Construction equipment and heavy machinery", "Pressure vessels, bridges, and energy projects"],
-    drivers: ["Project timing and capital expenditure cycles", "Freight and heavy-end market order books", "Mill specialization and regional supply availability"]
-  },
-  Bar: {
-    title: "Bar",
-    summary: "A long-steel category covering merchant bar and engineered bar used in fabrication and mechanical applications.",
-    definition: "Bar products are rolled long steels produced in rounds, flats, squares, or special shapes, with use cases ranging from construction to machinery.",
-    production: ["Frequently EAF-based using scrap and billet routes.", "May include merchant bar and special bar quality outputs.", "Regional demand can be highly localized versus flat-steel trade flows."],
-    applications: ["Construction fabrication and general engineering", "Fasteners, forged parts, and machinery inputs", "Merchant distribution into local fabrication markets"],
-    drivers: ["Scrap and billet cost", "Construction and fabrication activity", "Import billet availability and local rolling capacity"]
-  },
-  "Stainless Steel": {
-    title: "Stainless Steel",
-    summary: "A corrosion-resistant steel family priced off alloy surcharges, nickel/chromium inputs, and specialized downstream demand.",
-    definition: "Stainless Steel contains elevated chromium and, depending on grade family, nickel and molybdenum to provide corrosion resistance and heat tolerance.",
-    production: ["Produced through stainless melt shops and specialized rolling/annealing routes.", "Pricing often includes base price plus alloy surcharge.", "Different series such as 200, 300, and 400 behave differently on input exposure."],
-    applications: ["Food processing and kitchen equipment", "Chemical, medical, and clean-environment applications", "Architecture, transport, and corrosion-sensitive components"],
-    drivers: ["Nickel, ferrochrome, and alloy surcharges", "Specialty industrial demand and replacement cycles", "Regional premium levels and import duties"]
-  },
-  HDG: {
-    title: "Hot-Dipped Galvanized",
-    summary: "A coated flat product that adds zinc protection, widely used in automotive, appliances, and construction panels.",
-    definition: "HDG is cold-rolled or hot-rolled substrate coated in a zinc bath to improve corrosion resistance and lifecycle performance.",
-    production: ["Requires downstream coating line capacity.", "Often linked to CRC availability and zinc input costs.", "Commercial and exposed-quality coatings can price differently."],
-    applications: ["Automotive body panels", "Building panels and roofing", "Appliances and HVAC systems"],
-    drivers: ["CRC substrate pricing and zinc cost", "Coating-line utilization", "Auto, construction, and white-goods demand"]
-  },
-  "Steel Rebar": {
-    title: "Steel Rebar",
-    summary: "The main reinforcing steel product for concrete construction and one of the clearest indicators of construction demand.",
-    definition: "Steel Rebar is deformed reinforcing bar used to strengthen concrete in buildings, infrastructure, and civil projects.",
-    production: ["Typically rolled from billet in long-product mills.", "Often closely tied to scrap or billet input costs.", "Highly sensitive to local construction cycles and project timing."],
-    applications: ["Residential and commercial construction", "Infrastructure and civil works", "Public projects and foundations"],
-    drivers: ["Construction activity and project pipeline", "Scrap and billet pricing", "Trade barriers and local mill discipline"]
-  },
-  "Welded Pipe": {
-    title: "Welded Pipe",
-    summary: "A downstream tubular product made from coil or plate, priced off substrate plus conversion and end-market demand.",
-    definition: "Welded Pipe is formed and seam-welded from strip, coil, or plate into pipe dimensions for structural and line-pipe uses.",
-    production: ["Uses HRC or plate feedstock depending on specification.", "Conversion cost, coating, and certification matter to pricing.", "Demand depends on construction, energy, and infrastructure projects."],
-    applications: ["Construction and piling", "Water, gas, and utility line systems", "Mechanical and structural tubing demand"],
-    drivers: ["HRC/plate substrate prices", "Energy and construction spending", "Pipe mill capacity and trade cases"]
-  },
-  "Seamless Tube": {
-    title: "Seamless Tube",
-    summary: "A higher-spec tubular product used in pressure and energy applications where welded seams are not preferred.",
-    definition: "Seamless Tube is manufactured by piercing and rolling solid billets into hollow sections with no welded seam.",
-    production: ["Produced through specialized tube mills and heat-treatment routes.", "Higher technical requirements usually support a premium over welded products.", "Energy and industrial capex strongly influence demand."],
-    applications: ["Oil and gas OCTG and line applications", "Boilers, pressure systems, and heat exchangers", "Industrial mechanical tubing"],
-    drivers: ["Billet cost and tube conversion premium", "Oil and gas drilling and maintenance cycles", "Industrial and pressure-equipment demand"]
-  },
-  "Silicon Steel": {
-    title: "Silicon Steel",
-    summary: "An electrical steel grade used in motors, transformers, and grid equipment, with demand tied to electrification.",
-    definition: "Silicon Steel, or electrical steel, is alloyed to improve magnetic properties and reduce core losses in electrical equipment.",
-    production: ["Requires specialized chemistry, rolling, and annealing control.", "Produced in grain-oriented and non-grain-oriented variants.", "Supply is more concentrated than commodity flat steel."],
-    applications: ["Power transformers", "Motors and generators", "EV drivetrains and grid equipment"],
-    drivers: ["Electrical equipment and grid investment", "Specialty capacity availability", "Energy transition and EV production trends"]
-  },
-  "Tin Plate": {
-    title: "Tin Plate",
-    summary: "A thin coated sheet used mainly for packaging, with price behavior tied to CRC substrate and food-can demand.",
-    definition: "Tin Plate is thin low-carbon steel coated with tin for corrosion resistance and formability in packaging applications.",
-    production: ["Built on cold-rolled substrate with specialized coating lines.", "Packaging quality and coating consistency are central to value.", "Demand tends to be steadier than many construction-linked grades."],
-    applications: ["Food and beverage cans", "Aerosol containers", "Industrial and specialty packaging"],
-    drivers: ["CRC substrate and tin costs", "Packaging demand and consumer staples volumes", "Specialized coating capacity"]
-  },
-  "Steel Wire": {
-    title: "Steel Wire",
-    summary: "A drawn long-steel product used in fasteners, rope, reinforcement, and industrial applications.",
-    definition: "Steel Wire is produced by drawing rod through dies to reduce diameter and improve dimensional and mechanical properties.",
-    production: ["Starts from wire rod feedstock.", "May involve coating, heat treatment, or high-tensile processing.", "End-use requirements can create significant product segmentation."],
-    applications: ["Fasteners and springs", "Wire rope and industrial cable", "Mesh, reinforcement, and engineered components"],
-    drivers: ["Wire rod input cost", "Manufacturing and construction demand", "Processing intensity and specification mix"]
-  }
-};
-
-function parseMonthLabel(label) {
-  const [monthName, yearText] = label.split("/");
-  return {
-    monthIndex: monthNames.indexOf(monthName),
-    year: Number(yearText)
+    labels: historicalMonths,
+    supply: buildLongHistorySeries({ latest: 103.4, start: 96.1, precision: 1, seasonalAmplitude: 0.9, cycleAmplitude: 0.5, phase: 0.3, floor: 85 }),
+    demand: buildLongHistorySeries({ latest: 102.6, start: 94.8, precision: 1, seasonalAmplitude: 0.85, cycleAmplitude: 0.55, phase: 0.9, floor: 84 })
   };
-}
-
-function buildForecastMonths(lastHistoricalLabel, endYear, endMonthIndex) {
-  const { monthIndex, year } = parseMonthLabel(lastHistoricalLabel);
-  const labels = [];
-  let currentMonth = monthIndex;
-  let currentYear = year;
-
-  while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonthIndex)) {
-    currentMonth += 1;
-    if (currentMonth >= 12) {
-      currentMonth = 0;
-      currentYear += 1;
-    }
-    if (currentYear > endYear || (currentYear === endYear && currentMonth > endMonthIndex)) {
-      break;
-    }
-    labels.push(`${monthNames[currentMonth]}/${currentYear}`);
+  
+  function deriveCountrySeries(values, country, { precision = 1, floor = null, amplitude = 1 } = {}) {
+    const bias = countryMarketBias[country] || 0;
+    return values.map((value, index) => {
+      const wave = Math.sin(index / 7 + country.length * 0.35) * amplitude;
+      const adjusted = value * (1 + bias * 8) + wave;
+      const scaled = Number(adjusted.toFixed(precision));
+      return floor === null ? scaled : Math.max(floor, scaled);
+    });
   }
-
-  return labels;
-}
-
-const forecastMonths = buildForecastMonths(historicalMonths.at(-1), 2027, 11);
-
-const headlines = [
-  {
-    topic: "Trade Policy",
-    title: "New safeguard reviews are reshaping import flows in Europe and Southeast Asia.",
-    source: "Policy monitor",
-    impact: "Pricing power improves for local integrated producers while distributors face mix volatility."
-  },
-  {
-    topic: "Raw Materials",
-    title: "Iron ore and coking coal spreads remain the clearest signal for blast-furnace margin pressure.",
-    source: "Commodity desk",
-    impact: "Flat steel spreads are stabilizing, but coal spikes still threaten near-term conversion costs."
+  
+  function getSupplyDemandDataset(country) {
+    return {
+      labels: supplyDemand.labels,
+      supply: deriveCountrySeries(supplyDemand.supply, country, { precision: 1, floor: 85, amplitude: 0.8 }),
+      demand: deriveCountrySeries(supplyDemand.demand, country, { precision: 1, floor: 84, amplitude: 0.8 }),
+      stats: supplyDemand.stats.map((stat, index) => {
+        const countrySeries = deriveCountrySeries(stat.series, country, {
+          precision: stat.decimals,
+          floor: stat.unit === "%" ? 55 : stat.unit === "days" ? 18 : 3,
+          amplitude: index === 0 ? 0.45 : index === 1 ? 1.4 : 0.12
+        });
+        const latest = countrySeries.at(-1);
+        const countryLabel = readableLabel(country);
+        const countryNoteMap = {
+          "Capacity Utilization": `${countryLabel} mill utilization versus the long-cycle baseline.`,
+          Inventories: `${countryLabel} distributor and service-center cover trend.`,
+          "Order Books": `${countryLabel} downstream booking visibility and project confidence.`
+        };
+        return {
+          ...stat,
+          note: countryNoteMap[stat.label] || stat.note,
+          latest,
+          series: countrySeries
+        };
+      })
+    };
   }
-];
-
-const liveNewsConfig = {
-  query: "steel OR iron ore OR coking coal OR rebar OR hot rolled coil OR stainless steel OR steel mill",
-  maxItems: 6
-};
-
-function createMillFinancials({
-  mill,
-  revenue,
-  grossMargin,
-  ebitda,
-  debt,
-  current,
-  roic,
-  phase,
-  sourceLabel = "Public-company reporting aligned estimate",
-  quality = "reported"
-}) {
-  const indexedStockBase = Math.max(88, Math.min(152, 100 + (roic - debt * 2.4 + grossMargin * 0.45)));
-  return {
+  
+  const regionalDefinitions = [
+    { region: "North America", color: "#b84428", countries: ["USA"], description: "Domestic utilization, trade actions, and manufacturing demand shape the regional premium." },
+    { region: "Europe", color: "#d47529", countries: ["Germany", "UK", "Italy"], description: "Energy, carbon, and import discipline keep Europe moving differently from the world average." },
+    { region: "China", color: "#375f42", countries: ["China"], description: "China remains the largest reference market for export pressure and global steel pricing." },
+    { region: "India", color: "#3f7f92", countries: ["India"], description: "India balances project-led domestic demand against rapid additions in steelmaking capacity." },
+    { region: "Asia Ex-China", color: "#ae8e2c", countries: ["Japan", "SouthKorea", "Vietnam", "Indonesia"], description: "Asian ex-China markets reflect manufacturing, import competition, and semi-finished flows." },
+    { region: "Latin America", color: "#7b5b8e", countries: ["Brazil"], description: "Freight, trade protections, and construction activity shape Latin American price differentials." }
+  ];
+  
+  const forecastDriverLibrary = {
+    default: {
+      up: [
+        { title: "Raw-material pass-through", detail: "Iron ore, coal, scrap, and energy inflation can keep mill offer prices firm when conversion margins tighten." },
+        { title: "Trade protection and outages", detail: "Tariffs, safeguard cases, and maintenance outages can reduce import pressure and tighten local availability." },
+        { title: "Project-led demand", detail: "Infrastructure, grid, shipbuilding, and industrial capex can keep order books resilient even if other sectors soften." }
+      ],
+      down: [
+        { title: "Export competition", detail: "Aggressive exports from oversupplied regions can reset transaction prices lower across spot markets." },
+        { title: "Demand slowdown", detail: "Weaker construction, machinery, or auto output can reduce bookings and extend mill discounting." },
+        { title: "Inventory destocking", detail: "Service center and distributor destocking can amplify price pressure even before end-demand deteriorates materially." }
+      ]
+    },
+    HRC: {
+      up: [
+        { title: "Automotive and appliance restocking", detail: "Flat-steel restocking improves sheet utilization and supports higher spot HRC replacement pricing." },
+        { title: "Trade cases on coated and sheet imports", detail: "Protection against low-priced imports can shift negotiating leverage back to domestic producers." },
+        { title: "Energy and ore cost push", detail: "Higher ore, coal, power, or freight costs tend to lift HRC floor prices." }
+      ],
+      down: [
+        { title: "China export pressure", detail: "Higher exported sheet volumes can cap global HRC recovery and compress arbitrage gaps." },
+        { title: "Manufacturing slowdown", detail: "Lower industrial production reduces service center replenishment and weakens mill pricing power." },
+        { title: "Capacity additions", detail: "New flat-steel capacity can slow margin recovery if demand does not absorb incremental output." }
+      ]
+    },
+    Bar: {
+      up: [
+        { title: "Infrastructure and rebar demand", detail: "Civil works, transport, and public infrastructure projects support long-product consumption." },
+        { title: "Scrap tightness", detail: "Higher scrap costs lift EAF conversion costs and long-product price floors." },
+        { title: "Regional supply constraints", detail: "Construction-led demand spikes can outpace available rebar and merchant bar supply." }
+      ],
+      down: [
+        { title: "Real-estate weakness", detail: "Soft property and residential construction quickly hit long-product order books." },
+        { title: "Import competition", detail: "Cheaper billet and finished long products can pressure domestic transaction prices." },
+        { title: "Seasonal demand pauses", detail: "Weather and project timing can create abrupt monthly slowdowns in construction steel demand." }
+      ]
+    }
+  };
+  
+  const steelWikiData = {
+    HRC: {
+      title: "Hot Rolled Coil",
+      summary: "The base flat-steel benchmark for industrial manufacturing, service centers, pipe, and downstream coated products.",
+      definition: "Hot Rolled Coil is produced by rolling semi-finished steel at high temperature, creating a versatile coil product with scale on the surface and relatively looser tolerances than cold-rolled grades.",
+      production: ["Primarily produced through blast furnace-basic oxygen furnace or EAF flat-rolling routes.", "Serves as the starting substrate for cold-rolled, galvanized, and pipe products.", "Lead times and utilization rates often make HRC the main benchmark for flat-steel cycles."],
+      applications: ["Structural components and general fabrication", "Pipe and tube feedstock", "Machinery, transport equipment, and service-center distribution"],
+      drivers: ["Iron ore, coal, scrap, and energy conversion costs", "Manufacturing demand and auto/appliance restocking", "Import competition, tariffs, and mill utilization rates"]
+    },
+    CR: {
+      title: "Cold Rolled Coil",
+      summary: "A thinner, more precise flat product used where tighter tolerances, improved finish, and formability matter.",
+      definition: "Cold Rolled Coil is made by pickling and cold reducing hot-rolled substrate, producing a smoother surface and more consistent thickness control.",
+      production: ["Built from HRC feedstock via tandem cold mills.", "Often annealed and tempered to achieve target mechanical properties.", "Common precursor for exposed automotive and appliance sheet."],
+      applications: ["Automotive exposed panels and stampings", "Home appliances and office furniture", "Precision tubing and engineered components"],
+      drivers: ["HRC substrate cost plus cold-reduction premium", "Auto and appliance demand", "Coating line availability and downstream restocking"]
+    },
+    Plate: {
+      title: "Steel Plate",
+      summary: "A heavier-gauge flat product tied closely to infrastructure, shipbuilding, pressure vessels, and heavy equipment.",
+      definition: "Steel Plate refers to thick flat steel rolled into discrete plate dimensions, typically above sheet and coil gauge ranges.",
+      production: ["Produced on plate mills from slabs or ingots.", "Can include normalized, quenched and tempered, or pressure-vessel grades.", "Typically less commoditized than benchmark coil products."],
+      applications: ["Shipbuilding and offshore structures", "Construction equipment and heavy machinery", "Pressure vessels, bridges, and energy projects"],
+      drivers: ["Project timing and capital expenditure cycles", "Freight and heavy-end market order books", "Mill specialization and regional supply availability"]
+    },
+    Bar: {
+      title: "Bar",
+      summary: "A long-steel category covering merchant bar and engineered bar used in fabrication and mechanical applications.",
+      definition: "Bar products are rolled long steels produced in rounds, flats, squares, or special shapes, with use cases ranging from construction to machinery.",
+      production: ["Frequently EAF-based using scrap and billet routes.", "May include merchant bar and special bar quality outputs.", "Regional demand can be highly localized versus flat-steel trade flows."],
+      applications: ["Construction fabrication and general engineering", "Fasteners, forged parts, and machinery inputs", "Merchant distribution into local fabrication markets"],
+      drivers: ["Scrap and billet cost", "Construction and fabrication activity", "Import billet availability and local rolling capacity"]
+    },
+    "Stainless Steel": {
+      title: "Stainless Steel",
+      summary: "A corrosion-resistant steel family priced off alloy surcharges, nickel/chromium inputs, and specialized downstream demand.",
+      definition: "Stainless Steel contains elevated chromium and, depending on grade family, nickel and molybdenum to provide corrosion resistance and heat tolerance.",
+      production: ["Produced through stainless melt shops and specialized rolling/annealing routes.", "Pricing often includes base price plus alloy surcharge.", "Different series such as 200, 300, and 400 behave differently on input exposure."],
+      applications: ["Food processing and kitchen equipment", "Chemical, medical, and clean-environment applications", "Architecture, transport, and corrosion-sensitive components"],
+      drivers: ["Nickel, ferrochrome, and alloy surcharges", "Specialty industrial demand and replacement cycles", "Regional premium levels and import duties"]
+    },
+    HDG: {
+      title: "Hot-Dipped Galvanized",
+      summary: "A coated flat product that adds zinc protection, widely used in automotive, appliances, and construction panels.",
+      definition: "HDG is cold-rolled or hot-rolled substrate coated in a zinc bath to improve corrosion resistance and lifecycle performance.",
+      production: ["Requires downstream coating line capacity.", "Often linked to CRC availability and zinc input costs.", "Commercial and exposed-quality coatings can price differently."],
+      applications: ["Automotive body panels", "Building panels and roofing", "Appliances and HVAC systems"],
+      drivers: ["CRC substrate pricing and zinc cost", "Coating-line utilization", "Auto, construction, and white-goods demand"]
+    },
+    "Steel Rebar": {
+      title: "Steel Rebar",
+      summary: "The main reinforcing steel product for concrete construction and one of the clearest indicators of construction demand.",
+      definition: "Steel Rebar is deformed reinforcing bar used to strengthen concrete in buildings, infrastructure, and civil projects.",
+      production: ["Typically rolled from billet in long-product mills.", "Often closely tied to scrap or billet input costs.", "Highly sensitive to local construction cycles and project timing."],
+      applications: ["Residential and commercial construction", "Infrastructure and civil works", "Public projects and foundations"],
+      drivers: ["Construction activity and project pipeline", "Scrap and billet pricing", "Trade barriers and local mill discipline"]
+    },
+    "Welded Pipe": {
+      title: "Welded Pipe",
+      summary: "A downstream tubular product made from coil or plate, priced off substrate plus conversion and end-market demand.",
+      definition: "Welded Pipe is formed and seam-welded from strip, coil, or plate into pipe dimensions for structural and line-pipe uses.",
+      production: ["Uses HRC or plate feedstock depending on specification.", "Conversion cost, coating, and certification matter to pricing.", "Demand depends on construction, energy, and infrastructure projects."],
+      applications: ["Construction and piling", "Water, gas, and utility line systems", "Mechanical and structural tubing demand"],
+      drivers: ["HRC/plate substrate prices", "Energy and construction spending", "Pipe mill capacity and trade cases"]
+    },
+    "Seamless Tube": {
+      title: "Seamless Tube",
+      summary: "A higher-spec tubular product used in pressure and energy applications where welded seams are not preferred.",
+      definition: "Seamless Tube is manufactured by piercing and rolling solid billets into hollow sections with no welded seam.",
+      production: ["Produced through specialized tube mills and heat-treatment routes.", "Higher technical requirements usually support a premium over welded products.", "Energy and industrial capex strongly influence demand."],
+      applications: ["Oil and gas OCTG and line applications", "Boilers, pressure systems, and heat exchangers", "Industrial mechanical tubing"],
+      drivers: ["Billet cost and tube conversion premium", "Oil and gas drilling and maintenance cycles", "Industrial and pressure-equipment demand"]
+    },
+    "Silicon Steel": {
+      title: "Silicon Steel",
+      summary: "An electrical steel grade used in motors, transformers, and grid equipment, with demand tied to electrification.",
+      definition: "Silicon Steel, or electrical steel, is alloyed to improve magnetic properties and reduce core losses in electrical equipment.",
+      production: ["Requires specialized chemistry, rolling, and annealing control.", "Produced in grain-oriented and non-grain-oriented variants.", "Supply is more concentrated than commodity flat steel."],
+      applications: ["Power transformers", "Motors and generators", "EV drivetrains and grid equipment"],
+      drivers: ["Electrical equipment and grid investment", "Specialty capacity availability", "Energy transition and EV production trends"]
+    },
+    "Tin Plate": {
+      title: "Tin Plate",
+      summary: "A thin coated sheet used mainly for packaging, with price behavior tied to CRC substrate and food-can demand.",
+      definition: "Tin Plate is thin low-carbon steel coated with tin for corrosion resistance and formability in packaging applications.",
+      production: ["Built on cold-rolled substrate with specialized coating lines.", "Packaging quality and coating consistency are central to value.", "Demand tends to be steadier than many construction-linked grades."],
+      applications: ["Food and beverage cans", "Aerosol containers", "Industrial and specialty packaging"],
+      drivers: ["CRC substrate and tin costs", "Packaging demand and consumer staples volumes", "Specialized coating capacity"]
+    },
+    "Steel Wire": {
+      title: "Steel Wire",
+      summary: "A drawn long-steel product used in fasteners, rope, reinforcement, and industrial applications.",
+      definition: "Steel Wire is produced by drawing rod through dies to reduce diameter and improve dimensional and mechanical properties.",
+      production: ["Starts from wire rod feedstock.", "May involve coating, heat treatment, or high-tensile processing.", "End-use requirements can create significant product segmentation."],
+      applications: ["Fasteners and springs", "Wire rope and industrial cable", "Mesh, reinforcement, and engineered components"],
+      drivers: ["Wire rod input cost", "Manufacturing and construction demand", "Processing intensity and specification mix"]
+    }
+  };
+  
+  function parseMonthLabel(label) {
+    const [monthName, yearText] = label.split("/");
+    return {
+      monthIndex: monthNames.indexOf(monthName),
+      year: Number(yearText)
+    };
+  }
+  
+  function buildForecastMonths(lastHistoricalLabel, endYear, endMonthIndex) {
+    const { monthIndex, year } = parseMonthLabel(lastHistoricalLabel);
+    const labels = [];
+    let currentMonth = monthIndex;
+    let currentYear = year;
+  
+    while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonthIndex)) {
+      currentMonth += 1;
+      if (currentMonth >= 12) {
+        currentMonth = 0;
+        currentYear += 1;
+      }
+      if (currentYear > endYear || (currentYear === endYear && currentMonth > endMonthIndex)) {
+        break;
+      }
+      labels.push(`${monthNames[currentMonth]}/${currentYear}`);
+    }
+  
+    return labels;
+  }
+  
+  const forecastMonths = buildForecastMonths(historicalMonths.at(-1), 2027, 11);
+  
+  const headlines = [
+    {
+      topic: "Trade Policy",
+      title: "New safeguard reviews are reshaping import flows in Europe and Southeast Asia.",
+      source: "Policy monitor",
+      impact: "Pricing power improves for local integrated producers while distributors face mix volatility."
+    },
+    {
+      topic: "Raw Materials",
+      title: "Iron ore and coking coal spreads remain the clearest signal for blast-furnace margin pressure.",
+      source: "Commodity desk",
+      impact: "Flat steel spreads are stabilizing, but coal spikes still threaten near-term conversion costs."
+    }
+  ];
+  
+  const liveNewsConfig = {
+    query: "steel OR iron ore OR coking coal OR rebar OR hot rolled coil OR stainless steel OR steel mill",
+    maxItems: 6
+  };
+  
+  function createMillFinancials({
     mill,
     revenue,
     grossMargin,
@@ -874,138 +861,153 @@ function createMillFinancials({
     debt,
     current,
     roic,
-    indexedStockBase,
-    sourceLabel,
-    quality,
-    history: {
-      revenue: buildLongHistorySeries({
-        latest: revenue,
-        start: revenue * 0.78,
-        precision: 1,
-        seasonalAmplitude: Math.max(revenue * 0.018, 0.8),
-        cycleAmplitude: Math.max(revenue * 0.012, 0.5),
-        phase,
-        floor: Math.max(revenue * 0.45, 5)
-      }),
-      grossMargin: buildLongHistorySeries({
-        latest: grossMargin,
-        start: Math.max(grossMargin - 2.6, 6),
-        precision: 1,
-        seasonalAmplitude: 0.7,
-        cycleAmplitude: 0.45,
-        phase: phase + 0.2,
-        floor: 3
-      }),
-      ebitda: buildLongHistorySeries({
-        latest: ebitda,
-        start: Math.max(ebitda - 3.8, 2),
-        precision: 1,
-        seasonalAmplitude: 0.9,
-        cycleAmplitude: 0.6,
-        phase: phase + 0.4,
-        floor: 1.5
-      }),
-      debt: buildLongHistorySeries({
-        latest: debt,
-        start: Math.max(debt + 0.9, debt * 1.45),
-        precision: 1,
-        seasonalAmplitude: 0.12,
-        cycleAmplitude: 0.08,
-        phase: phase + 0.8,
-        floor: 0.1
-      }),
-      current: buildLongHistorySeries({
-        latest: current,
-        start: Math.max(current - 0.25, 0.7),
-        precision: 1,
-        seasonalAmplitude: 0.08,
-        cycleAmplitude: 0.05,
-        phase: phase + 1.1,
-        floor: 0.5
-      }),
-      roic: buildLongHistorySeries({
-        latest: roic,
-        start: Math.max(roic - 3.2, 1.5),
-        precision: 1,
-        seasonalAmplitude: 0.7,
-        cycleAmplitude: 0.45,
-        phase: phase + 1.4,
-        floor: 1
-      }),
-      stockPerformance: buildLongHistorySeries({
-        latest: indexedStockBase,
-        start: Math.max(indexedStockBase * 0.78, 62),
-        precision: 1,
-        seasonalAmplitude: 2.4,
-        cycleAmplitude: 1.8,
-        phase: phase + 1.7,
-        floor: 55
-      })
-    }
-  };
-}
+    phase,
+    sourceLabel = "Public-company reporting aligned estimate",
+    quality = "reported"
+  }) {
+    const indexedStockBase = Math.max(88, Math.min(152, 100 + (roic - debt * 2.4 + grossMargin * 0.45)));
+    return {
+      mill,
+      revenue,
+      grossMargin,
+      ebitda,
+      debt,
+      current,
+      roic,
+      indexedStockBase,
+      sourceLabel,
+      quality,
+      history: {
+        revenue: buildLongHistorySeries({
+          latest: revenue,
+          start: revenue * 0.78,
+          precision: 1,
+          seasonalAmplitude: Math.max(revenue * 0.018, 0.8),
+          cycleAmplitude: Math.max(revenue * 0.012, 0.5),
+          phase,
+          floor: Math.max(revenue * 0.45, 5)
+        }),
+        grossMargin: buildLongHistorySeries({
+          latest: grossMargin,
+          start: Math.max(grossMargin - 2.6, 6),
+          precision: 1,
+          seasonalAmplitude: 0.7,
+          cycleAmplitude: 0.45,
+          phase: phase + 0.2,
+          floor: 3
+        }),
+        ebitda: buildLongHistorySeries({
+          latest: ebitda,
+          start: Math.max(ebitda - 3.8, 2),
+          precision: 1,
+          seasonalAmplitude: 0.9,
+          cycleAmplitude: 0.6,
+          phase: phase + 0.4,
+          floor: 1.5
+        }),
+        debt: buildLongHistorySeries({
+          latest: debt,
+          start: Math.max(debt + 0.9, debt * 1.45),
+          precision: 1,
+          seasonalAmplitude: 0.12,
+          cycleAmplitude: 0.08,
+          phase: phase + 0.8,
+          floor: 0.1
+        }),
+        current: buildLongHistorySeries({
+          latest: current,
+          start: Math.max(current - 0.25, 0.7),
+          precision: 1,
+          seasonalAmplitude: 0.08,
+          cycleAmplitude: 0.05,
+          phase: phase + 1.1,
+          floor: 0.5
+        }),
+        roic: buildLongHistorySeries({
+          latest: roic,
+          start: Math.max(roic - 3.2, 1.5),
+          precision: 1,
+          seasonalAmplitude: 0.7,
+          cycleAmplitude: 0.45,
+          phase: phase + 1.4,
+          floor: 1
+        }),
+        stockPerformance: buildLongHistorySeries({
+          latest: indexedStockBase,
+          start: Math.max(indexedStockBase * 0.78, 62),
+          precision: 1,
+          seasonalAmplitude: 2.4,
+          cycleAmplitude: 1.8,
+          phase: phase + 1.7,
+          floor: 55
+        })
+      }
+    };
+  }
+  
+  const financialRatios = [
+    createMillFinancials({ mill: "ArcelorMittal", revenue: 61.4, grossMargin: 16.1, ebitda: 10.7, debt: 1.2, current: 1.6, roic: 9.2, phase: 0.1, sourceLabel: "Official FY2025 results, supplemented where line items are not directly disclosed", quality: "reported" }),
+    createMillFinancials({ mill: "Nucor", revenue: 32.5, grossMargin: 19.6, ebitda: 12.2, debt: 1.8, current: 2.9, roic: 14.1, phase: 0.2, sourceLabel: "Official FY2025 results, supplemented where line items are not directly disclosed", quality: "reported" }),
+    createMillFinancials({ mill: "POSCO", revenue: 57.2, grossMargin: 14.6, ebitda: 10.3, debt: 1.4, current: 1.4, roic: 7.5, phase: 0.3 }),
+    createMillFinancials({ mill: "Tata Steel", revenue: 31.5, grossMargin: 15.8, ebitda: 11.6, debt: 2.1, current: 1.1, roic: 8.4, phase: 0.4 }),
+    createMillFinancials({ mill: "Baowu (proxy)", revenue: 111.7, grossMargin: 13.2, ebitda: 8.9, debt: 2.4, current: 1.2, roic: 6.8, phase: 0.5, sourceLabel: "Proxy issuer mapping; directional only", quality: "proxy" }),
+    createMillFinancials({ mill: "Cleveland-Cliffs", revenue: 21.9, grossMargin: 14.3, ebitda: 10.2, debt: 2.7, current: 1.4, roic: 7.1, phase: 0.6 }),
+    createMillFinancials({ mill: "Steel Dynamics", revenue: 19.6, grossMargin: 22.4, ebitda: 17.1, debt: 0.8, current: 2.2, roic: 13.5, phase: 0.7 }),
+    createMillFinancials({ mill: "US Steel", revenue: 18.7, grossMargin: 13.1, ebitda: 9.4, debt: 1.6, current: 1.8, roic: 6.9, phase: 0.8 }),
+    createMillFinancials({ mill: "SSAB", revenue: 12.9, grossMargin: 18.6, ebitda: 13.8, debt: 0.9, current: 1.7, roic: 10.8, phase: 0.9 }),
+    createMillFinancials({ mill: "Voestalpine", revenue: 18.2, grossMargin: 16.1, ebitda: 10.8, debt: 1.3, current: 1.5, roic: 8.2, phase: 1.0 }),
+    createMillFinancials({ mill: "thyssenkrupp Steel (proxy)", revenue: 14.1, grossMargin: 11.7, ebitda: 7.8, debt: 2.5, current: 1.0, roic: 5.4, phase: 1.1, sourceLabel: "Proxy issuer mapping; directional only", quality: "proxy" }),
+    createMillFinancials({ mill: "Salzgitter", revenue: 11.6, grossMargin: 12.9, ebitda: 8.6, debt: 1.7, current: 1.3, roic: 6.1, phase: 1.2 }),
+    createMillFinancials({ mill: "Nippon Steel", revenue: 61.3, grossMargin: 15.4, ebitda: 11.2, debt: 1.5, current: 1.2, roic: 7.8, phase: 1.3 }),
+    createMillFinancials({ mill: "JFE Holdings", revenue: 35.8, grossMargin: 13.9, ebitda: 9.8, debt: 1.8, current: 1.1, roic: 6.7, phase: 1.4 }),
+    createMillFinancials({ mill: "Hyundai Steel", revenue: 17.4, grossMargin: 12.8, ebitda: 8.7, debt: 1.9, current: 1.1, roic: 5.9, phase: 1.5 }),
+    createMillFinancials({ mill: "JSW Steel", revenue: 23.8, grossMargin: 17.2, ebitda: 12.8, debt: 1.9, current: 1.2, roic: 9.4, phase: 1.6 }),
+    createMillFinancials({ mill: "Jindal Steel & Power", revenue: 8.6, grossMargin: 20.3, ebitda: 15.1, debt: 1.7, current: 1.3, roic: 11.6, phase: 1.7 }),
+    createMillFinancials({ mill: "NMDC Steel", revenue: 4.9, grossMargin: 11.2, ebitda: 7.3, debt: 2.8, current: 1.0, roic: 4.8, phase: 1.8 }),
+    createMillFinancials({ mill: "China Oriental", revenue: 6.8, grossMargin: 10.7, ebitda: 6.9, debt: 2.6, current: 1.1, roic: 4.6, phase: 1.9 }),
+    createMillFinancials({ mill: "Maanshan Iron & Steel", revenue: 14.6, grossMargin: 10.9, ebitda: 7.1, debt: 2.2, current: 1.0, roic: 4.9, phase: 2.0 }),
+    createMillFinancials({ mill: "Shougang Fushan (proxy)", revenue: 9.7, grossMargin: 12.1, ebitda: 8.2, debt: 1.9, current: 1.2, roic: 5.7, phase: 2.1, sourceLabel: "Proxy issuer mapping; directional only", quality: "proxy" }),
+    createMillFinancials({ mill: "Gerdau", revenue: 16.5, grossMargin: 17.9, ebitda: 13.4, debt: 1.2, current: 1.6, roic: 10.5, phase: 2.2 }),
+    createMillFinancials({ mill: "Ternium", revenue: 17.1, grossMargin: 18.8, ebitda: 14.2, debt: 0.7, current: 2.0, roic: 11.2, phase: 2.3 }),
+    createMillFinancials({ mill: "CSN", revenue: 10.2, grossMargin: 14.8, ebitda: 10.1, debt: 2.3, current: 1.1, roic: 7.2, phase: 2.4 }),
+    createMillFinancials({ mill: "Usiminas", revenue: 6.1, grossMargin: 15.2, ebitda: 11.3, debt: 1.5, current: 1.4, roic: 8.1, phase: 2.5 }),
+    createMillFinancials({ mill: "Metinvest (proxy)", revenue: 11.4, grossMargin: 13.6, ebitda: 9.5, debt: 2.0, current: 1.1, roic: 6.3, phase: 2.6, sourceLabel: "Proxy issuer mapping; directional only", quality: "proxy" }),
+    createMillFinancials({ mill: "Erdemir", revenue: 9.8, grossMargin: 16.4, ebitda: 12.1, debt: 1.0, current: 1.8, roic: 9.1, phase: 2.7 }),
+    createMillFinancials({ mill: "Severstal", revenue: 12.7, grossMargin: 19.4, ebitda: 15.8, debt: 0.5, current: 2.1, roic: 12.4, phase: 2.8 }),
+    createMillFinancials({ mill: "Magnitogorsk Iron & Steel", revenue: 10.3, grossMargin: 17.1, ebitda: 13.2, debt: 0.6, current: 1.9, roic: 10.7, phase: 2.9 }),
+    createMillFinancials({ mill: "Evraz", revenue: 14.8, grossMargin: 14.2, ebitda: 10.6, debt: 1.8, current: 1.3, roic: 7.4, phase: 3.0 })
+  ];
+  
+  const sensitivityScenarios = [
+    { label: "+5%", value: 5 },
+    { label: "+10%", value: 10 },
+    { label: "+15%", value: 15 },
+    { label: "-5%", value: -5 }
+  ];
+  
+  const industrySensitivity = [
+    { industry: "Automotive OEM", primaryGrades: ["HRC", "CR", "HDG"], exposures: { HRC: 0.06, CR: 0.11, HDG: 0.08, Plate: 0.01 } },
+    { industry: "White Goods & Appliances", primaryGrades: ["CR", "HDG", "Stainless Steel"], exposures: { CR: 0.12, HDG: 0.07, "Stainless Steel": 0.03 } },
+    { industry: "Construction & Infrastructure", primaryGrades: ["Steel Rebar", "Plate", "Steel Wire"], exposures: { "Steel Rebar": 0.14, Plate: 0.06, "Steel Wire": 0.04, Bar: 0.03 } },
+    { industry: "Oil & Gas Pipe", primaryGrades: ["Welded Pipe", "Seamless Tube", "Plate"], exposures: { "Welded Pipe": 0.12, "Seamless Tube": 0.08, Plate: 0.04 } },
+    { industry: "Shipbuilding", primaryGrades: ["Plate", "Bar", "HRC"], exposures: { Plate: 0.18, Bar: 0.03, HRC: 0.02 } },
+    { industry: "Machinery & Industrial Equipment", primaryGrades: ["Plate", "Bar", "Steel Wire"], exposures: { Plate: 0.08, Bar: 0.06, "Steel Wire": 0.03, HRC: 0.02 } },
+    { industry: "Renewables & Wind Towers", primaryGrades: ["Plate", "HRC", "Steel Wire"], exposures: { Plate: 0.15, HRC: 0.05, "Steel Wire": 0.02 } },
+    { industry: "Packaging", primaryGrades: ["Tin Plate", "CR"], exposures: { "Tin Plate": 0.16, CR: 0.04 } },
+    { industry: "Electrical Equipment", primaryGrades: ["Silicon Steel", "CR", "Steel Wire"], exposures: { "Silicon Steel": 0.13, CR: 0.04, "Steel Wire": 0.03 } },
+    { industry: "Rail & Heavy Transport", primaryGrades: ["Plate", "Bar", "HRC"], exposures: { Plate: 0.1, Bar: 0.05, HRC: 0.04, "Steel Rebar": 0.02 } }
+  ];
+  
+  const steelTypeSelect = document.querySelector("#steelTypeSelect");
+  const countrySelect = document.querySelector("#countrySelect");
+  const forecastSteelTypeSelect = document.querySelector("#forecastSteelTypeSelect");
+  const forecastCountrySelect = document.querySelector("#forecastCountrySelect");
+  const regionalSteelTypeSelect = document.querySelector("#regionalSteelTypeSelect");
+  const steelWikiSelect = document.querySelector("#steelWikiSelect");
+  const sensitivityGradeSelect = document.querySelector("#sensitivityGradeSelect");
+  const sensitivityShockSelect = document.querySelector("#sensitivityShockSelect");
 
-const financialRatios = [
-  createMillFinancials({ mill: "ArcelorMittal", revenue: 61.4, grossMargin: 16.1, ebitda: 10.7, debt: 1.2, current: 1.6, roic: 9.2, phase: 0.1, sourceLabel: "Official FY2025 results, supplemented where line items are not directly disclosed", quality: "reported" }),
-  createMillFinancials({ mill: "Nucor", revenue: 32.5, grossMargin: 19.6, ebitda: 12.2, debt: 1.8, current: 2.9, roic: 14.1, phase: 0.2, sourceLabel: "Official FY2025 results, supplemented where line items are not directly disclosed", quality: "reported" }),
-  createMillFinancials({ mill: "POSCO", revenue: 57.2, grossMargin: 14.6, ebitda: 10.3, debt: 1.4, current: 1.4, roic: 7.5, phase: 0.3 }),
-  createMillFinancials({ mill: "Tata Steel", revenue: 31.5, grossMargin: 15.8, ebitda: 11.6, debt: 2.1, current: 1.1, roic: 8.4, phase: 0.4 }),
-  createMillFinancials({ mill: "Baowu (proxy)", revenue: 111.7, grossMargin: 13.2, ebitda: 8.9, debt: 2.4, current: 1.2, roic: 6.8, phase: 0.5, sourceLabel: "Proxy issuer mapping; directional only", quality: "proxy" }),
-  createMillFinancials({ mill: "Cleveland-Cliffs", revenue: 21.9, grossMargin: 14.3, ebitda: 10.2, debt: 2.7, current: 1.4, roic: 7.1, phase: 0.6 }),
-  createMillFinancials({ mill: "Steel Dynamics", revenue: 19.6, grossMargin: 22.4, ebitda: 17.1, debt: 0.8, current: 2.2, roic: 13.5, phase: 0.7 }),
-  createMillFinancials({ mill: "US Steel", revenue: 18.7, grossMargin: 13.1, ebitda: 9.4, debt: 1.6, current: 1.8, roic: 6.9, phase: 0.8 }),
-  createMillFinancials({ mill: "SSAB", revenue: 12.9, grossMargin: 18.6, ebitda: 13.8, debt: 0.9, current: 1.7, roic: 10.8, phase: 0.9 }),
-  createMillFinancials({ mill: "Voestalpine", revenue: 18.2, grossMargin: 16.1, ebitda: 10.8, debt: 1.3, current: 1.5, roic: 8.2, phase: 1.0 }),
-  createMillFinancials({ mill: "thyssenkrupp Steel (proxy)", revenue: 14.1, grossMargin: 11.7, ebitda: 7.8, debt: 2.5, current: 1.0, roic: 5.4, phase: 1.1, sourceLabel: "Proxy issuer mapping; directional only", quality: "proxy" }),
-  createMillFinancials({ mill: "Salzgitter", revenue: 11.6, grossMargin: 12.9, ebitda: 8.6, debt: 1.7, current: 1.3, roic: 6.1, phase: 1.2 }),
-  createMillFinancials({ mill: "Nippon Steel", revenue: 61.3, grossMargin: 15.4, ebitda: 11.2, debt: 1.5, current: 1.2, roic: 7.8, phase: 1.3 }),
-  createMillFinancials({ mill: "JFE Holdings", revenue: 35.8, grossMargin: 13.9, ebitda: 9.8, debt: 1.8, current: 1.1, roic: 6.7, phase: 1.4 }),
-  createMillFinancials({ mill: "Hyundai Steel", revenue: 17.4, grossMargin: 12.8, ebitda: 8.7, debt: 1.9, current: 1.1, roic: 5.9, phase: 1.5 }),
-  createMillFinancials({ mill: "JSW Steel", revenue: 23.8, grossMargin: 17.2, ebitda: 12.8, debt: 1.9, current: 1.2, roic: 9.4, phase: 1.6 }),
-  createMillFinancials({ mill: "Jindal Steel & Power", revenue: 8.6, grossMargin: 20.3, ebitda: 15.1, debt: 1.7, current: 1.3, roic: 11.6, phase: 1.7 }),
-  createMillFinancials({ mill: "NMDC Steel", revenue: 4.9, grossMargin: 11.2, ebitda: 7.3, debt: 2.8, current: 1.0, roic: 4.8, phase: 1.8 }),
-  createMillFinancials({ mill: "China Oriental", revenue: 6.8, grossMargin: 10.7, ebitda: 6.9, debt: 2.6, current: 1.1, roic: 4.6, phase: 1.9 }),
-  createMillFinancials({ mill: "Maanshan Iron & Steel", revenue: 14.6, grossMargin: 10.9, ebitda: 7.1, debt: 2.2, current: 1.0, roic: 4.9, phase: 2.0 }),
-  createMillFinancials({ mill: "Shougang Fushan (proxy)", revenue: 9.7, grossMargin: 12.1, ebitda: 8.2, debt: 1.9, current: 1.2, roic: 5.7, phase: 2.1, sourceLabel: "Proxy issuer mapping; directional only", quality: "proxy" }),
-  createMillFinancials({ mill: "Gerdau", revenue: 16.5, grossMargin: 17.9, ebitda: 13.4, debt: 1.2, current: 1.6, roic: 10.5, phase: 2.2 }),
-  createMillFinancials({ mill: "Ternium", revenue: 17.1, grossMargin: 18.8, ebitda: 14.2, debt: 0.7, current: 2.0, roic: 11.2, phase: 2.3 }),
-  createMillFinancials({ mill: "CSN", revenue: 10.2, grossMargin: 14.8, ebitda: 10.1, debt: 2.3, current: 1.1, roic: 7.2, phase: 2.4 }),
-  createMillFinancials({ mill: "Usiminas", revenue: 6.1, grossMargin: 15.2, ebitda: 11.3, debt: 1.5, current: 1.4, roic: 8.1, phase: 2.5 }),
-  createMillFinancials({ mill: "Metinvest (proxy)", revenue: 11.4, grossMargin: 13.6, ebitda: 9.5, debt: 2.0, current: 1.1, roic: 6.3, phase: 2.6, sourceLabel: "Proxy issuer mapping; directional only", quality: "proxy" }),
-  createMillFinancials({ mill: "Erdemir", revenue: 9.8, grossMargin: 16.4, ebitda: 12.1, debt: 1.0, current: 1.8, roic: 9.1, phase: 2.7 }),
-  createMillFinancials({ mill: "Severstal", revenue: 12.7, grossMargin: 19.4, ebitda: 15.8, debt: 0.5, current: 2.1, roic: 12.4, phase: 2.8 }),
-  createMillFinancials({ mill: "Magnitogorsk Iron & Steel", revenue: 10.3, grossMargin: 17.1, ebitda: 13.2, debt: 0.6, current: 1.9, roic: 10.7, phase: 2.9 }),
-  createMillFinancials({ mill: "Evraz", revenue: 14.8, grossMargin: 14.2, ebitda: 10.6, debt: 1.8, current: 1.3, roic: 7.4, phase: 3.0 })
-];
 
-const sensitivityScenarios = [
-  { label: "+5%", value: 5 },
-  { label: "+10%", value: 10 },
-  { label: "+15%", value: 15 },
-  { label: "-5%", value: -5 }
-];
-
-const industrySensitivity = [
-  { industry: "Automotive OEM", primaryGrades: ["HRC", "CR", "HDG"], exposures: { HRC: 0.06, CR: 0.11, HDG: 0.08, Plate: 0.01 } },
-  { industry: "White Goods & Appliances", primaryGrades: ["CR", "HDG", "Stainless Steel"], exposures: { CR: 0.12, HDG: 0.07, "Stainless Steel": 0.03 } },
-  { industry: "Construction & Infrastructure", primaryGrades: ["Steel Rebar", "Plate", "Steel Wire"], exposures: { "Steel Rebar": 0.14, Plate: 0.06, "Steel Wire": 0.04, Bar: 0.03 } },
-  { industry: "Oil & Gas Pipe", primaryGrades: ["Welded Pipe", "Seamless Tube", "Plate"], exposures: { "Welded Pipe": 0.12, "Seamless Tube": 0.08, Plate: 0.04 } },
-  { industry: "Shipbuilding", primaryGrades: ["Plate", "Bar", "HRC"], exposures: { Plate: 0.18, Bar: 0.03, HRC: 0.02 } },
-  { industry: "Machinery & Industrial Equipment", primaryGrades: ["Plate", "Bar", "Steel Wire"], exposures: { Plate: 0.08, Bar: 0.06, "Steel Wire": 0.03, HRC: 0.02 } },
-  { industry: "Renewables & Wind Towers", primaryGrades: ["Plate", "HRC", "Steel Wire"], exposures: { Plate: 0.15, HRC: 0.05, "Steel Wire": 0.02 } },
-  { industry: "Packaging", primaryGrades: ["Tin Plate", "CR"], exposures: { "Tin Plate": 0.16, CR: 0.04 } },
-  { industry: "Electrical Equipment", primaryGrades: ["Silicon Steel", "CR", "Steel Wire"], exposures: { "Silicon Steel": 0.13, CR: 0.04, "Steel Wire": 0.03 } },
-  { industry: "Rail & Heavy Transport", primaryGrades: ["Plate", "Bar", "HRC"], exposures: { Plate: 0.1, Bar: 0.05, HRC: 0.04, "Steel Rebar": 0.02 } }
-];
-
-const steelTypeSelect = document.querySelector("#steelTypeSelect");
-const countrySelect = document.querySelector("#countrySelect");
-const forecastSteelTypeSelect = document.querySelector("#forecastSteelTypeSelect");
-const forecastCountrySelect = document.querySelector("#forecastCountrySelect");
-const regionalSteelTypeSelect = document.querySelector("#regionalSteelTypeSelect");
-const steelWikiSelect = document.querySelector("#steelWikiSelect");
-const sensitivityGradeSelect = document.querySelector("#sensitivityGradeSelect");
-const sensitivityShockSelect = document.querySelector("#sensitivityShockSelect");
 const timeRangeSlider = document.querySelector("#timeRangeSlider");
 const costTimeRangeSlider = document.querySelector("#costTimeRangeSlider");
 const supplyTimeRangeSlider = document.querySelector("#supplyTimeRangeSlider");
@@ -1016,7 +1018,6 @@ const costHorizonSelect = document.querySelector("#costHorizonSelect");
 const heroTickerTrack = document.querySelector("#heroTickerTrack");
 const heroCostTickerTrack = document.querySelector("#heroCostTickerTrack");
 const heroOfficeTimeTrack = document.querySelector("#heroOfficeTimeTrack");
-const homeHeroGallery = document.querySelector("#homeHeroGallery");
 const views = document.querySelectorAll(".app-view");
 const tickerAnimations = new WeakMap();
 let officeTimeIntervalId = null;
@@ -1284,10 +1285,6 @@ function showView(viewName) {
   document.querySelectorAll(".nav-link").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.target === viewName);
   });
-
-  if (homeHeroGallery) {
-    homeHeroGallery.classList.toggle("is-hidden", viewName !== "home");
-  }
 
   if (viewName === "home") {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1804,10 +1801,10 @@ function renderCostDrivers() {
     });
   });
 }
-
 function renderSupplyDemand() {
   const supplyDataset = getSupplyDemandDataset(appState.selectedSupplyCountry);
   const selectedCountryLabel = readableLabel(appState.selectedSupplyCountry);
+  const selectedCountryFlag = getCountryFlagMarkup(appState.selectedSupplyCountry, selectedCountryLabel);
   supplyCountrySelect.value = appState.selectedSupplyCountry;
   const selectedStat = supplyDataset.stats.find((stat) => stat.label === appState.selectedSupplyMetric) || supplyDataset.stats[0];
   document.querySelector("#dynamicsCards").innerHTML = supplyDataset.stats
@@ -1827,7 +1824,7 @@ function renderSupplyDemand() {
 
   document.querySelector("#supplyDemandDetail").innerHTML = `
     <p class="section-label">Selected Market & Metric</p>
-    <h3>${selectedCountryLabel} · ${selectedStat.label}</h3>
+    <h3>${selectedCountryFlag}${selectedCountryLabel} · ${selectedStat.label}</h3>
     <p>${selectedStat.note}</p>
     <div class="ratio-notes">
       <div class="ratio-note"><span>Latest reading</span><strong>${formatMetricValue(selectedStat.latest, selectedStat.unit, selectedStat.decimals)}</strong></div>
@@ -2245,7 +2242,7 @@ function renderRatios() {
   document.querySelector("#financialSourceNote").innerHTML = `
     <p class="section-label">Data Quality</p>
     <h3>Public reporting first, proxy where needed</h3>
-    <p>${selectedMill.sourceLabel}. Snapshot values target public-company reporting where available; monthly histories are interpolated to create a continuous 10-year view. Mills labeled “proxy” are directional placeholders, not direct issuer filings.</p>
+    <p>${selectedMill.sourceLabel}. Snapshot values target public-company reporting where available; monthly histories are interpolated to create a continuous 10-year view. Mills labeled 鈥減roxy鈥?are directional placeholders, not direct issuer filings.</p>
     <div class="ratio-notes">
       <div class="ratio-note"><span>Reported / aligned names</span><strong>${reportedCount}</strong></div>
       <div class="ratio-note"><span>Proxy names</span><strong>${proxyCount}</strong></div>
@@ -2506,3 +2503,7 @@ function init() {
 }
 
 init();
+
+
+
+

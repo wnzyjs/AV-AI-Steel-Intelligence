@@ -10,6 +10,7 @@ const appState = {
   costHorizon: "10Y",
   selectedCostDriver: "Iron Ore",
   selectedSupplyMetric: "Capacity Utilization",
+  selectedSupplyCountry: "China",
   selectedRegion: "North America",
   selectedRegionalSteelType: "HRC",
   selectedMill: "ArcelorMittal",
@@ -17,6 +18,40 @@ const appState = {
 };
 
 const palette = ["#375f42", "#d47529", "#b84428", "#ae8e2c", "#3f7f92", "#7b5b8e"];
+
+const countryMarketBias = {
+  USA: 0.0025,
+  Germany: 0.0015,
+  UK: 0.0012,
+  Italy: 0.0011,
+  India: 0.0022,
+  China: -0.0018,
+  Turkey: -0.0006,
+  Japan: 0.0006,
+  SouthKorea: 0.0003,
+  Brazil: 0.001,
+  Australia: 0.0008,
+  Vietnam: 0.0004,
+  Indonesia: 0.0002,
+  Mexico: 0.0009
+};
+
+const countryFlagCodes = {
+  Australia: "AU",
+  Brazil: "BR",
+  China: "CN",
+  Germany: "DE",
+  India: "IN",
+  Indonesia: "ID",
+  Italy: "IT",
+  Japan: "JP",
+  Mexico: "MX",
+  SouthKorea: "KR",
+  Turkey: "TR",
+  UK: "GB",
+  USA: "US",
+  Vietnam: "VN"
+};
 
 const priceTrendData = {
   HRC: {
@@ -183,6 +218,81 @@ priceTrendData["Silicon Steel"] = structuredClone(priceTrendData["Stainless Stee
 priceTrendData["Tin Plate"] = structuredClone(priceTrendData.CR);
 priceTrendData["Steel Wire"] = structuredClone(priceTrendData.Bar);
 priceTrendData["Steel Rebar"] = structuredClone(priceTrendData.Bar);
+
+function getAllPriceCountries() {
+  return Array.from(
+    new Set(
+      Object.values(priceTrendData)
+        .flatMap((countrySets) => Object.values(countrySets))
+        .flatMap((dataset) => Object.keys(dataset.series))
+    )
+  );
+}
+
+function getCountryReferenceSeries(country) {
+  for (const [steelType, countrySets] of Object.entries(priceTrendData)) {
+    for (const dataset of Object.values(countrySets)) {
+      if (dataset.series[country]) {
+        return { steelType, series: dataset.series[country] };
+      }
+    }
+  }
+  return null;
+}
+
+function averageSeries(seriesCollection) {
+  if (!seriesCollection.length) {
+    return [];
+  }
+
+  return seriesCollection[0].map((_, index) => {
+    const values = seriesCollection.map((series) => series[index]);
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
+  });
+}
+
+function fillMissingPriceCountryCoverage() {
+  const allPriceCountries = getAllPriceCountries();
+
+  Object.entries(priceTrendData).forEach(([steelType, countrySets]) => {
+    const primaryMarketKey = Object.keys(countrySets)[0];
+    const primaryMarket = countrySets[primaryMarketKey];
+    const targetAverageSeries = averageSeries(Object.values(primaryMarket.series));
+    const targetAverageLevel = targetAverageSeries.reduce((sum, value) => sum + value, 0) / targetAverageSeries.length;
+
+    allPriceCountries.forEach((country) => {
+      const alreadyCovered = Object.values(countrySets).some((dataset) => dataset.series[country]);
+      if (alreadyCovered) {
+        return;
+      }
+
+      const reference = getCountryReferenceSeries(country);
+      if (!reference) {
+        return;
+      }
+
+      const referenceAverageSeries = averageSeries(
+        Object.values(priceTrendData[reference.steelType]).flatMap((dataset) => Object.values(dataset.series))
+      );
+      const referenceAverageLevel = referenceAverageSeries.reduce((sum, value) => sum + value, 0) / referenceAverageSeries.length;
+      const countryPremium = reference.series.reduce((sum, value) => sum + value, 0) / reference.series.length / referenceAverageLevel;
+
+      let derivedSeries = targetAverageSeries.map((value, index) => {
+        const referenceIndex = index % reference.series.length;
+        const seasonalTilt = reference.series[referenceIndex] / referenceAverageSeries[referenceIndex];
+        return Math.max(1, Math.round(value * countryPremium * (0.72 + seasonalTilt * 0.28)));
+      });
+
+      const derivedAverageLevel = derivedSeries.reduce((sum, value) => sum + value, 0) / derivedSeries.length;
+      const levelAdjustment = targetAverageLevel * countryPremium / derivedAverageLevel;
+      derivedSeries = derivedSeries.map((value) => Math.max(1, Math.round(value * levelAdjustment)));
+
+      primaryMarket.series[country] = derivedSeries;
+    });
+  });
+}
+
+fillMissingPriceCountryCoverage();
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const historicalMonths = [];
@@ -507,6 +617,44 @@ const supplyDemand = {
   demand: buildLongHistorySeries({ latest: 102.6, start: 94.8, precision: 1, seasonalAmplitude: 0.85, cycleAmplitude: 0.55, phase: 0.9, floor: 84 })
 };
 
+function deriveCountrySeries(values, country, { precision = 1, floor = null, amplitude = 1 } = {}) {
+  const bias = countryMarketBias[country] || 0;
+  return values.map((value, index) => {
+    const wave = Math.sin(index / 7 + country.length * 0.35) * amplitude;
+    const adjusted = value * (1 + bias * 8) + wave;
+    const scaled = Number(adjusted.toFixed(precision));
+    return floor === null ? scaled : Math.max(floor, scaled);
+  });
+}
+
+function getSupplyDemandDataset(country) {
+  return {
+    labels: supplyDemand.labels,
+    supply: deriveCountrySeries(supplyDemand.supply, country, { precision: 1, floor: 85, amplitude: 0.8 }),
+    demand: deriveCountrySeries(supplyDemand.demand, country, { precision: 1, floor: 84, amplitude: 0.8 }),
+    stats: supplyDemand.stats.map((stat, index) => {
+      const countrySeries = deriveCountrySeries(stat.series, country, {
+        precision: stat.decimals,
+        floor: stat.unit === "%" ? 55 : stat.unit === "days" ? 18 : 3,
+        amplitude: index === 0 ? 0.45 : index === 1 ? 1.4 : 0.12
+      });
+      const latest = countrySeries.at(-1);
+      const countryLabel = readableLabel(country);
+      const countryNoteMap = {
+        "Capacity Utilization": `${countryLabel} mill utilization versus the long-cycle baseline.`,
+        Inventories: `${countryLabel} distributor and service-center cover trend.`,
+        "Order Books": `${countryLabel} downstream booking visibility and project confidence.`
+      };
+      return {
+        ...stat,
+        note: countryNoteMap[stat.label] || stat.note,
+        latest,
+        series: countrySeries
+      };
+    })
+  };
+}
+
 const regionalDefinitions = [
   { region: "North America", color: "#b84428", countries: ["USA"], description: "Domestic utilization, trade actions, and manufacturing demand shape the regional premium." },
   { region: "Europe", color: "#d47529", countries: ["Germany", "UK", "Italy"], description: "Energy, carbon, and import discipline keep Europe moving differently from the world average." },
@@ -552,6 +700,105 @@ const forecastDriverLibrary = {
       { title: "Import competition", detail: "Cheaper billet and finished long products can pressure domestic transaction prices." },
       { title: "Seasonal demand pauses", detail: "Weather and project timing can create abrupt monthly slowdowns in construction steel demand." }
     ]
+  }
+};
+
+const steelWikiData = {
+  HRC: {
+    title: "Hot Rolled Coil",
+    summary: "The base flat-steel benchmark for industrial manufacturing, service centers, pipe, and downstream coated products.",
+    definition: "Hot Rolled Coil is produced by rolling semi-finished steel at high temperature, creating a versatile coil product with scale on the surface and relatively looser tolerances than cold-rolled grades.",
+    production: ["Primarily produced through blast furnace-basic oxygen furnace or EAF flat-rolling routes.", "Serves as the starting substrate for cold-rolled, galvanized, and pipe products.", "Lead times and utilization rates often make HRC the main benchmark for flat-steel cycles."],
+    applications: ["Structural components and general fabrication", "Pipe and tube feedstock", "Machinery, transport equipment, and service-center distribution"],
+    drivers: ["Iron ore, coal, scrap, and energy conversion costs", "Manufacturing demand and auto/appliance restocking", "Import competition, tariffs, and mill utilization rates"]
+  },
+  CR: {
+    title: "Cold Rolled Coil",
+    summary: "A thinner, more precise flat product used where tighter tolerances, improved finish, and formability matter.",
+    definition: "Cold Rolled Coil is made by pickling and cold reducing hot-rolled substrate, producing a smoother surface and more consistent thickness control.",
+    production: ["Built from HRC feedstock via tandem cold mills.", "Often annealed and tempered to achieve target mechanical properties.", "Common precursor for exposed automotive and appliance sheet."],
+    applications: ["Automotive exposed panels and stampings", "Home appliances and office furniture", "Precision tubing and engineered components"],
+    drivers: ["HRC substrate cost plus cold-reduction premium", "Auto and appliance demand", "Coating line availability and downstream restocking"]
+  },
+  Plate: {
+    title: "Steel Plate",
+    summary: "A heavier-gauge flat product tied closely to infrastructure, shipbuilding, pressure vessels, and heavy equipment.",
+    definition: "Steel Plate refers to thick flat steel rolled into discrete plate dimensions, typically above sheet and coil gauge ranges.",
+    production: ["Produced on plate mills from slabs or ingots.", "Can include normalized, quenched and tempered, or pressure-vessel grades.", "Typically less commoditized than benchmark coil products."],
+    applications: ["Shipbuilding and offshore structures", "Construction equipment and heavy machinery", "Pressure vessels, bridges, and energy projects"],
+    drivers: ["Project timing and capital expenditure cycles", "Freight and heavy-end market order books", "Mill specialization and regional supply availability"]
+  },
+  Bar: {
+    title: "Bar",
+    summary: "A long-steel category covering merchant bar and engineered bar used in fabrication and mechanical applications.",
+    definition: "Bar products are rolled long steels produced in rounds, flats, squares, or special shapes, with use cases ranging from construction to machinery.",
+    production: ["Frequently EAF-based using scrap and billet routes.", "May include merchant bar and special bar quality outputs.", "Regional demand can be highly localized versus flat-steel trade flows."],
+    applications: ["Construction fabrication and general engineering", "Fasteners, forged parts, and machinery inputs", "Merchant distribution into local fabrication markets"],
+    drivers: ["Scrap and billet cost", "Construction and fabrication activity", "Import billet availability and local rolling capacity"]
+  },
+  "Stainless Steel": {
+    title: "Stainless Steel",
+    summary: "A corrosion-resistant steel family priced off alloy surcharges, nickel/chromium inputs, and specialized downstream demand.",
+    definition: "Stainless Steel contains elevated chromium and, depending on grade family, nickel and molybdenum to provide corrosion resistance and heat tolerance.",
+    production: ["Produced through stainless melt shops and specialized rolling/annealing routes.", "Pricing often includes base price plus alloy surcharge.", "Different series such as 200, 300, and 400 behave differently on input exposure."],
+    applications: ["Food processing and kitchen equipment", "Chemical, medical, and clean-environment applications", "Architecture, transport, and corrosion-sensitive components"],
+    drivers: ["Nickel, ferrochrome, and alloy surcharges", "Specialty industrial demand and replacement cycles", "Regional premium levels and import duties"]
+  },
+  HDG: {
+    title: "Hot-Dipped Galvanized",
+    summary: "A coated flat product that adds zinc protection, widely used in automotive, appliances, and construction panels.",
+    definition: "HDG is cold-rolled or hot-rolled substrate coated in a zinc bath to improve corrosion resistance and lifecycle performance.",
+    production: ["Requires downstream coating line capacity.", "Often linked to CRC availability and zinc input costs.", "Commercial and exposed-quality coatings can price differently."],
+    applications: ["Automotive body panels", "Building panels and roofing", "Appliances and HVAC systems"],
+    drivers: ["CRC substrate pricing and zinc cost", "Coating-line utilization", "Auto, construction, and white-goods demand"]
+  },
+  "Steel Rebar": {
+    title: "Steel Rebar",
+    summary: "The main reinforcing steel product for concrete construction and one of the clearest indicators of construction demand.",
+    definition: "Steel Rebar is deformed reinforcing bar used to strengthen concrete in buildings, infrastructure, and civil projects.",
+    production: ["Typically rolled from billet in long-product mills.", "Often closely tied to scrap or billet input costs.", "Highly sensitive to local construction cycles and project timing."],
+    applications: ["Residential and commercial construction", "Infrastructure and civil works", "Public projects and foundations"],
+    drivers: ["Construction activity and project pipeline", "Scrap and billet pricing", "Trade barriers and local mill discipline"]
+  },
+  "Welded Pipe": {
+    title: "Welded Pipe",
+    summary: "A downstream tubular product made from coil or plate, priced off substrate plus conversion and end-market demand.",
+    definition: "Welded Pipe is formed and seam-welded from strip, coil, or plate into pipe dimensions for structural and line-pipe uses.",
+    production: ["Uses HRC or plate feedstock depending on specification.", "Conversion cost, coating, and certification matter to pricing.", "Demand depends on construction, energy, and infrastructure projects."],
+    applications: ["Construction and piling", "Water, gas, and utility line systems", "Mechanical and structural tubing demand"],
+    drivers: ["HRC/plate substrate prices", "Energy and construction spending", "Pipe mill capacity and trade cases"]
+  },
+  "Seamless Tube": {
+    title: "Seamless Tube",
+    summary: "A higher-spec tubular product used in pressure and energy applications where welded seams are not preferred.",
+    definition: "Seamless Tube is manufactured by piercing and rolling solid billets into hollow sections with no welded seam.",
+    production: ["Produced through specialized tube mills and heat-treatment routes.", "Higher technical requirements usually support a premium over welded products.", "Energy and industrial capex strongly influence demand."],
+    applications: ["Oil and gas OCTG and line applications", "Boilers, pressure systems, and heat exchangers", "Industrial mechanical tubing"],
+    drivers: ["Billet cost and tube conversion premium", "Oil and gas drilling and maintenance cycles", "Industrial and pressure-equipment demand"]
+  },
+  "Silicon Steel": {
+    title: "Silicon Steel",
+    summary: "An electrical steel grade used in motors, transformers, and grid equipment, with demand tied to electrification.",
+    definition: "Silicon Steel, or electrical steel, is alloyed to improve magnetic properties and reduce core losses in electrical equipment.",
+    production: ["Requires specialized chemistry, rolling, and annealing control.", "Produced in grain-oriented and non-grain-oriented variants.", "Supply is more concentrated than commodity flat steel."],
+    applications: ["Power transformers", "Motors and generators", "EV drivetrains and grid equipment"],
+    drivers: ["Electrical equipment and grid investment", "Specialty capacity availability", "Energy transition and EV production trends"]
+  },
+  "Tin Plate": {
+    title: "Tin Plate",
+    summary: "A thin coated sheet used mainly for packaging, with price behavior tied to CRC substrate and food-can demand.",
+    definition: "Tin Plate is thin low-carbon steel coated with tin for corrosion resistance and formability in packaging applications.",
+    production: ["Built on cold-rolled substrate with specialized coating lines.", "Packaging quality and coating consistency are central to value.", "Demand tends to be steadier than many construction-linked grades."],
+    applications: ["Food and beverage cans", "Aerosol containers", "Industrial and specialty packaging"],
+    drivers: ["CRC substrate and tin costs", "Packaging demand and consumer staples volumes", "Specialized coating capacity"]
+  },
+  "Steel Wire": {
+    title: "Steel Wire",
+    summary: "A drawn long-steel product used in fasteners, rope, reinforcement, and industrial applications.",
+    definition: "Steel Wire is produced by drawing rod through dies to reduce diameter and improve dimensional and mechanical properties.",
+    production: ["Starts from wire rod feedstock.", "May involve coating, heat treatment, or high-tensile processing.", "End-use requirements can create significant product segmentation."],
+    applications: ["Fasteners and springs", "Wire rope and industrial cable", "Mesh, reinforcement, and engineered components"],
+    drivers: ["Wire rod input cost", "Manufacturing and construction demand", "Processing intensity and specification mix"]
   }
 };
 
@@ -756,15 +1003,23 @@ const countrySelect = document.querySelector("#countrySelect");
 const forecastSteelTypeSelect = document.querySelector("#forecastSteelTypeSelect");
 const forecastCountrySelect = document.querySelector("#forecastCountrySelect");
 const regionalSteelTypeSelect = document.querySelector("#regionalSteelTypeSelect");
+const steelWikiSelect = document.querySelector("#steelWikiSelect");
 const sensitivityGradeSelect = document.querySelector("#sensitivityGradeSelect");
 const sensitivityShockSelect = document.querySelector("#sensitivityShockSelect");
 const timeRangeSlider = document.querySelector("#timeRangeSlider");
 const costTimeRangeSlider = document.querySelector("#costTimeRangeSlider");
 const supplyTimeRangeSlider = document.querySelector("#supplyTimeRangeSlider");
+const supplyCountrySelect = document.querySelector("#supplyCountrySelect");
 const regionalTimeRangeSlider = document.querySelector("#regionalTimeRangeSlider");
 const financialYearSelect = document.querySelector("#financialYearSelect");
 const costHorizonSelect = document.querySelector("#costHorizonSelect");
+const heroTickerTrack = document.querySelector("#heroTickerTrack");
+const heroCostTickerTrack = document.querySelector("#heroCostTickerTrack");
+const heroOfficeTimeTrack = document.querySelector("#heroOfficeTimeTrack");
+const homeHeroGallery = document.querySelector("#homeHeroGallery");
 const views = document.querySelectorAll(".app-view");
+const tickerAnimations = new WeakMap();
+let officeTimeIntervalId = null;
 const navigationButtons = document.querySelectorAll("[data-target]");
 const mapCountries = ["USA", "Brazil", "Germany", "UK", "Italy", "Turkey", "India", "China", "SouthKorea", "Japan", "Vietnam", "Indonesia", "Australia"];
 const allCountries = Array.from(
@@ -789,9 +1044,29 @@ function getCountryMarkets(country) {
   return matches;
 }
 
-function getPreferredMarketForCountry(country, steelType = appState.steelType) {
+function getPreferredMarketForCountry(country, steelType = null) {
   const matches = getCountryMarkets(country);
-  return matches.find((entry) => entry.steelType === steelType) || matches[0] || null;
+  if (steelType) {
+    return matches.find((entry) => entry.steelType === steelType) || null;
+  }
+  return matches[0] || null;
+}
+
+function getAvailableCountriesForSteelType(steelType) {
+  const { mergedSeries } = getMergedCountrySeries(steelType);
+  return Array.from(mergedSeries.keys()).sort((left, right) => readableLabel(left).localeCompare(readableLabel(right)));
+}
+
+function populateCountrySelect(selectElement, steelType, preferredCountry) {
+  const countries = getAvailableCountriesForSteelType(steelType);
+  const resolvedCountry = countries.includes(preferredCountry) ? preferredCountry : countries[0];
+
+  selectElement.innerHTML = countries
+    .map((country) => `<option value="${country}">${readableLabel(country)}</option>`)
+    .join("");
+
+  selectElement.value = resolvedCountry;
+  return resolvedCountry;
 }
 
 function getMergedCountrySeries(steelType) {
@@ -844,20 +1119,157 @@ function getRegionalDeltaData(steelType) {
   return { labels, unit, regions };
 }
 
-function setCountryFocus(country, steelType = appState.steelType) {
-  const matches = getCountryMarkets(country);
-  const preferred = matches.find((entry) => entry.steelType === steelType) || matches[0];
-  if (!preferred) {
+function renderHeroTicker() {
+  const tickerEntries = [
+    { steelType: "HRC", country: "China" },
+    { steelType: "HRC", country: "USA" },
+    { steelType: "CR", country: "Germany" },
+    { steelType: "Plate", country: "India" },
+    { steelType: "Bar", country: "Turkey" },
+    { steelType: "Stainless Steel", country: "China" },
+    { steelType: "HDG", country: "SouthKorea" },
+    { steelType: "Steel Rebar", country: "Vietnam" },
+    { steelType: "Welded Pipe", country: "UK" },
+    { steelType: "Silicon Steel", country: "Japan" }
+  ]
+    .map(({ steelType, country }) => {
+      const market = getPreferredMarketForCountry(country, steelType);
+      if (!market) {
+        return null;
+      }
+      const dataset = priceTrendData[steelType][market.countrySet];
+      const latest = dataset.series[country].at(-1);
+      const dateLabel = dataset.months.at(-1);
+      return `
+        <div class="hero-ticker-item">
+          <span class="hero-ticker-grade">${steelType}</span>
+          <span class="hero-ticker-country">${readableLabel(country)}</span>
+          <span class="hero-ticker-time">${dateLabel}</span>
+          <span class="hero-ticker-price">${Math.round(latest)} ${dataset.unit}</span>
+        </div>
+      `;
+    })
+    .filter(Boolean);
+
+  heroTickerTrack.innerHTML = [...tickerEntries, ...tickerEntries].join("");
+  startTickerMotion(heroTickerTrack, 0.1);
+}
+
+function renderHeroCostTicker() {
+  const tickerEntries = costDrivers
+    .map((driver) => {
+      const latest = costTrend.series[driver.name]?.at(-1);
+      if (latest === undefined) {
+        return null;
+      }
+      return `
+        <div class="hero-ticker-item">
+          <span class="hero-ticker-grade">${driver.name}</span>
+          <span class="hero-ticker-country">${driver.benchmark}</span>
+          <span class="hero-ticker-time">${historicalMonths.at(-1)}</span>
+          <span class="hero-ticker-price">${Number(latest).toFixed(driver.unit === "USD/MMBtu" ? 1 : 0)} ${driver.unit}</span>
+        </div>
+      `;
+    })
+    .filter(Boolean);
+
+  heroCostTickerTrack.innerHTML = [...tickerEntries, ...tickerEntries].join("");
+  startTickerMotion(heroCostTickerTrack, -0.08);
+}
+
+function renderOfficeTimes() {
+  const offices = [
+    { city: "Boston", timeZone: "America/New_York" },
+    { city: "New York", timeZone: "America/New_York" },
+    { city: "Chicago", timeZone: "America/Chicago" },
+    { city: "Miami", timeZone: "America/New_York" },
+    { city: "Stockholm", timeZone: "Europe/Stockholm" },
+    { city: "Shanghai", timeZone: "Asia/Shanghai" }
+  ];
+
+  const entries = offices.map((office) => {
+    const timeText = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: office.timeZone
+    }).format(new Date());
+
+    return `
+      <div class="hero-office-time-item">
+        <span class="hero-office-time-city">${office.city}</span>
+        <span class="hero-office-time-value">${timeText}</span>
+      </div>
+    `;
+  });
+
+  heroOfficeTimeTrack.innerHTML = [...entries, ...entries].join("");
+  startTickerMotion(heroOfficeTimeTrack, 0.05);
+}
+
+function startTickerMotion(track, speed) {
+  if (!track) {
     return;
   }
 
-  appState.steelType = preferred.steelType;
-  appState.selectedCountry = country;
+  const existingAnimation = tickerAnimations.get(track);
+  if (existingAnimation) {
+    cancelAnimationFrame(existingAnimation.frameId);
+  }
+
+  let offset = speed < 0 ? -track.scrollWidth / 2 : 0;
+  let previousTime = performance.now();
+
+  function step(currentTime) {
+    const elapsed = currentTime - previousTime;
+    previousTime = currentTime;
+    const loopWidth = Math.max(track.scrollWidth / 2, 1);
+    offset -= speed * elapsed;
+
+    if (speed > 0 && offset <= -loopWidth) {
+      offset += loopWidth;
+    }
+    if (speed < 0 && offset >= 0) {
+      offset -= loopWidth;
+    }
+
+    track.style.transform = `translateX(${offset}px)`;
+    const frameId = requestAnimationFrame(step);
+    tickerAnimations.set(track, { frameId });
+  }
+
+  const frameId = requestAnimationFrame(step);
+  tickerAnimations.set(track, { frameId });
+}
+
+function setCountryFocus(country, steelType = null) {
+  if (steelType) {
+    const availableCountries = getAvailableCountriesForSteelType(steelType);
+    if (!availableCountries.length) {
+      return;
+    }
+
+    appState.steelType = steelType;
+    appState.selectedCountry = availableCountries.includes(country) ? country : availableCountries[0];
+  } else {
+    const matches = getCountryMarkets(country);
+    const preferred = matches.find((entry) => entry.steelType === appState.steelType) || matches[0];
+    if (!preferred) {
+      return;
+    }
+
+    appState.steelType = preferred.steelType;
+    appState.selectedCountry = country;
+  }
+
+  populateCountrySelect(countrySelect, appState.steelType, appState.selectedCountry);
+  populateCountrySelect(forecastCountrySelect, appState.steelType, appState.selectedCountry);
   steelTypeSelect.value = appState.steelType;
   countrySelect.value = appState.selectedCountry;
   forecastSteelTypeSelect.value = appState.steelType;
   forecastCountrySelect.value = appState.selectedCountry;
   regionalSteelTypeSelect.value = appState.selectedRegionalSteelType;
+  steelWikiSelect.value = appState.steelType;
   renderPriceSection();
 }
 
@@ -873,7 +1285,13 @@ function showView(viewName) {
     button.classList.toggle("is-active", button.dataset.target === viewName);
   });
 
-  if (matchingViews.length) {
+  if (homeHeroGallery) {
+    homeHeroGallery.classList.toggle("is-hidden", viewName !== "home");
+  }
+
+  if (viewName === "home") {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else if (matchingViews.length) {
     matchingViews[0].scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
@@ -919,21 +1337,23 @@ function initControls() {
     steelTypeSelect.append(option);
     forecastSteelTypeSelect.append(option.cloneNode(true));
     regionalSteelTypeSelect.append(option.cloneNode(true));
+    steelWikiSelect.append(option.cloneNode(true));
   });
 
+  steelTypeSelect.value = appState.steelType;
+  forecastSteelTypeSelect.value = appState.steelType;
+  appState.selectedCountry = populateCountrySelect(countrySelect, appState.steelType, appState.selectedCountry);
+  populateCountrySelect(forecastCountrySelect, appState.steelType, appState.selectedCountry);
   allCountries.forEach((country) => {
     const option = document.createElement("option");
     option.value = country;
     option.textContent = readableLabel(country);
-    countrySelect.append(option);
-    forecastCountrySelect.append(option.cloneNode(true));
+    supplyCountrySelect.append(option);
   });
-
-  steelTypeSelect.value = appState.steelType;
-  countrySelect.value = appState.selectedCountry;
-  forecastSteelTypeSelect.value = appState.steelType;
-  forecastCountrySelect.value = appState.selectedCountry;
+  appState.selectedSupplyCountry = allCountries.includes(appState.selectedSupplyCountry) ? appState.selectedSupplyCountry : appState.selectedCountry;
+  supplyCountrySelect.value = appState.selectedSupplyCountry;
   regionalSteelTypeSelect.value = appState.selectedRegionalSteelType;
+  steelWikiSelect.value = appState.steelType;
 
   steelTypeSelect.addEventListener("change", (event) => {
     appState.steelType = event.target.value;
@@ -945,6 +1365,11 @@ function initControls() {
     appState.selectedCountry = event.target.value;
     setCountryFocus(appState.selectedCountry, appState.steelType);
     renderPriceSection();
+  });
+
+  supplyCountrySelect.addEventListener("change", (event) => {
+    appState.selectedSupplyCountry = event.target.value;
+    renderSupplyDemand();
   });
 
   forecastSteelTypeSelect.addEventListener("change", (event) => {
@@ -962,6 +1387,10 @@ function initControls() {
   regionalSteelTypeSelect.addEventListener("change", (event) => {
     appState.selectedRegionalSteelType = event.target.value;
     renderRegionalDelta();
+  });
+
+  steelWikiSelect.addEventListener("change", (event) => {
+    renderSteelWiki(event.target.value);
   });
 
   Object.keys(priceTrendData).forEach((steelType) => {
@@ -1079,7 +1508,7 @@ function formatMetricValue(value, unit, decimals = 1) {
 }
 
 function renderPriceSection() {
-  const market = getPreferredMarketForCountry(appState.selectedCountry);
+  const market = getPreferredMarketForCountry(appState.selectedCountry, appState.steelType);
   if (!market) {
     return;
   }
@@ -1096,16 +1525,31 @@ function renderPriceSection() {
     const values = Array.from(mergedSeries.values()).map((series) => series[index]);
     return values.reduce((sum, value) => sum + value, 0) / values.length;
   });
+  const latestGlobalAverage = globalAverageSeries.at(-1);
+  const globalDelta = latestPrice - latestGlobalAverage;
+  const globalDeltaPct = (globalDelta / latestGlobalAverage) * 100;
+  const previousPrice = selectedSeries.at(-2);
+  const monthOnMonth = latestPrice - previousPrice;
+  const monthOnMonthPct = (monthOnMonth / previousPrice) * 100;
+  const trailingTwelve = selectedSeries.slice(-12);
+  const trailingLow = Math.min(...trailingTwelve);
+  const trailingHigh = Math.max(...trailingTwelve);
+  const trailingAverage = Math.round(trailingTwelve.reduce((sum, value) => sum + value, 0) / trailingTwelve.length);
+  const latestLabel = dataset.months.at(-1);
+  const oneYearAgo = selectedSeries.at(-13) ?? selectedSeries[0];
+  const yearlyDeltaPct = ((latestPrice - oneYearAgo) / oneYearAgo) * 100;
+  const selectedCountryLabel = readableLabel(appState.selectedCountry);
+  const selectedCountryFlag = getCountryFlagMarkup(appState.selectedCountry, selectedCountryLabel);
 
-  document.querySelector("#trendTitle").textContent = `${readableLabel(appState.selectedCountry)} ${appState.steelType} price trend`;
+  document.querySelector("#trendTitle").textContent = `${selectedCountryLabel} ${appState.steelType} price trend`;
   document.querySelector("#trendMeta").textContent = `Monthly average, ${dataset.unit}, Jan/2016-Apr/2026`;
 
   document.querySelector("#countrySpotlight").innerHTML = `
     <div class="spotlight-header">
       <div class="spotlight-copy">
         <p class="section-label">Country Spotlight</p>
-        <h3>${readableLabel(appState.selectedCountry)}</h3>
-        <p>${appState.steelType} pricing in ${readableLabel(appState.selectedCountry)} with benchmark comparison to the global average.</p>
+        <h3>${selectedCountryFlag}${selectedCountryLabel}</h3>
+        <p>${appState.steelType} pricing in ${selectedCountryLabel} with benchmark comparison to the global average.</p>
       </div>
       <div class="spotlight-price">
         <span>Latest price</span>
@@ -1118,9 +1562,47 @@ function renderPriceSection() {
       <div><span>10Y change</span><strong>${momentum.toFixed(1)}%</strong></div>
       <div><span>Comparison basis</span><strong>Global average</strong></div>
     </div>
+    <div class="spotlight-insights">
+      <div class="spotlight-insight">
+        <span>Latest vs global</span>
+        <strong>${globalDelta >= 0 ? "+" : ""}${Math.round(globalDelta)} ${dataset.unit}</strong>
+        <small>${globalDeltaPct >= 0 ? "+" : ""}${globalDeltaPct.toFixed(1)}% against global average</small>
+      </div>
+      <div class="spotlight-insight">
+        <span>Month on month</span>
+        <strong>${monthOnMonth >= 0 ? "+" : ""}${Math.round(monthOnMonth)} ${dataset.unit}</strong>
+        <small>${monthOnMonthPct >= 0 ? "+" : ""}${monthOnMonthPct.toFixed(1)}% vs prior month</small>
+      </div>
+      <div class="spotlight-insight">
+        <span>Last 12M range</span>
+        <strong>${trailingLow}-${trailingHigh} ${dataset.unit}</strong>
+        <small>Average ${trailingAverage} ${dataset.unit}</small>
+      </div>
+      <div class="spotlight-insight">
+        <span>Latest print</span>
+        <strong>${latestLabel}</strong>
+        <small>${yearlyDeltaPct >= 0 ? "+" : ""}${yearlyDeltaPct.toFixed(1)}% vs ${dataset.months.at(-13) ?? dataset.months[0]}</small>
+      </div>
+    </div>
+    <div class="spotlight-brief">
+      <div class="spotlight-brief-row">
+        <span>Market read-through</span>
+        <strong>${globalDelta >= 0 ? "Premium" : "Discount"} to global average</strong>
+      </div>
+      <div class="spotlight-brief-row">
+        <span>Price posture</span>
+        <strong>${latestPrice >= trailingAverage ? "Trading above" : "Trading below"} 12M mean</strong>
+      </div>
+      <div class="spotlight-brief-row">
+        <span>Current setup</span>
+        <strong>${monthOnMonth >= 0 ? "Near-term firming" : "Near-term softening"}</strong>
+      </div>
+    </div>
   `;
 
-  document.querySelector("#gradePriceList").innerHTML = Object.keys(priceTrendData)
+  const availableGrades = Object.keys(priceTrendData).filter((grade) => getPreferredMarketForCountry(appState.selectedCountry, grade));
+
+  const gradePriceMarkup = availableGrades
     .map((grade) => {
       const matchedMarket = getPreferredMarketForCountry(appState.selectedCountry, grade);
       if (!matchedMarket) {
@@ -1137,6 +1619,21 @@ function renderPriceSection() {
       `;
     })
     .join("");
+
+  document.querySelector("#gradePriceList").innerHTML = `
+    <div class="grade-price-shell">
+      <div class="grade-price-header">
+        <div>
+          <p class="section-label">Cross-Grade Snapshot</p>
+          <h3>${readableLabel(appState.selectedCountry)}</h3>
+        </div>
+        <small>${availableGrades.length} grades available at ${latestLabel}</small>
+      </div>
+      <div class="grade-price-grid">
+        ${gradePriceMarkup}
+      </div>
+    </div>
+  `;
 
   document.querySelector("#priceKpis").innerHTML = `
     <div class="mini-stat"><span>Latest price</span><strong>${latestPrice}</strong><small>${dataset.unit}</small></div>
@@ -1309,8 +1806,11 @@ function renderCostDrivers() {
 }
 
 function renderSupplyDemand() {
-  const selectedStat = supplyDemand.stats.find((stat) => stat.label === appState.selectedSupplyMetric) || supplyDemand.stats[0];
-  document.querySelector("#dynamicsCards").innerHTML = supplyDemand.stats
+  const supplyDataset = getSupplyDemandDataset(appState.selectedSupplyCountry);
+  const selectedCountryLabel = readableLabel(appState.selectedSupplyCountry);
+  supplyCountrySelect.value = appState.selectedSupplyCountry;
+  const selectedStat = supplyDataset.stats.find((stat) => stat.label === appState.selectedSupplyMetric) || supplyDataset.stats[0];
+  document.querySelector("#dynamicsCards").innerHTML = supplyDataset.stats
     .map(
       (stat) => `
         <button class="dynamics-card ${stat.label === appState.selectedSupplyMetric ? "is-active" : ""}" type="button" data-supply-stat="${stat.label}">
@@ -1326,27 +1826,28 @@ function renderSupplyDemand() {
   const supplyGap = selectedSeries.at(-1) - selectedSeries[0];
 
   document.querySelector("#supplyDemandDetail").innerHTML = `
-    <p class="section-label">Selected Metric</p>
-    <h3>${selectedStat.label}</h3>
+    <p class="section-label">Selected Market & Metric</p>
+    <h3>${selectedCountryLabel} · ${selectedStat.label}</h3>
     <p>${selectedStat.note}</p>
     <div class="ratio-notes">
       <div class="ratio-note"><span>Latest reading</span><strong>${formatMetricValue(selectedStat.latest, selectedStat.unit, selectedStat.decimals)}</strong></div>
       <div class="ratio-note"><span>10Y change</span><strong>${supplyGap >= 0 ? "+" : ""}${supplyGap.toFixed(selectedStat.decimals)}${selectedStat.unit === "%" ? " pts" : ` ${selectedStat.unit}`}</strong></div>
+      <div class="ratio-note"><span>Selected country</span><strong>${selectedCountryLabel}</strong></div>
     </div>
   `;
 
   updateWindowSlider({
-    labels: supplyDemand.labels,
+    labels: supplyDataset.labels,
     slider: supplyTimeRangeSlider,
     startKey: "supplyTimeWindowStart",
     labelSelector: "#supplySliderLabel"
   });
   const visibleSupply = getVisibleWindow(
-    supplyDemand.labels,
+    supplyDataset.labels,
     [
       { name: selectedStat.label, values: selectedSeries, color: selectedStat.color, active: true },
-      { name: "Supply", values: supplyDemand.supply, color: "#375f42", active: false },
-      { name: "Demand", values: supplyDemand.demand, color: "#d47529", active: false }
+      { name: `${selectedCountryLabel} supply`, values: supplyDataset.supply, color: "#375f42", active: false },
+      { name: `${selectedCountryLabel} demand`, values: supplyDataset.demand, color: "#d47529", active: false }
     ],
     appState.supplyTimeWindowStart
   );
@@ -1442,9 +1943,11 @@ function renderForecast() {
   const lastActual = forecastBundle.historyValues.at(-1);
   const firstForecast = forecastBundle.forecastLabels[0];
   const lastForecast = forecastBundle.forecastLabels.at(-1);
+  const selectedCountryLabel = readableLabel(appState.selectedCountry);
+  const selectedCountryFlag = getCountryFlagMarkup(appState.selectedCountry, selectedCountryLabel);
 
   document.querySelector("#forecastSummary").innerHTML = `
-    <div class="forecast-pill"><span>Selected market</span><strong>${readableLabel(appState.selectedCountry)} ${appState.steelType}</strong></div>
+    <div class="forecast-pill forecast-market-pill"><span>Selected market</span><strong>${selectedCountryFlag}${selectedCountryLabel} ${appState.steelType}</strong></div>
     <div class="forecast-pill"><span>Annualized median drift</span><strong>${cagr.toFixed(1)}%</strong></div>
     <div class="forecast-pill"><span>Dec/2027 P50</span><strong>${forecastBundle.p50.at(-1).toFixed(0)} ${forecastBundle.unit}</strong></div>
     <div class="forecast-pill"><span>Dec/2027 range</span><strong>${forecastBundle.p10.at(-1).toFixed(0)}-${forecastBundle.p90.at(-1).toFixed(0)}</strong></div>
@@ -1453,7 +1956,7 @@ function renderForecast() {
   document.querySelector("#forecastMethod").innerHTML = `
     <p class="section-label">Method</p>
     <h3>36-month history + Monte Carlo monthly simulation</h3>
-    <p>The model starts from the last actual observation in ${historicalMonths.at(-1)} at ${lastActual.toFixed(0)} ${forecastBundle.unit}, uses the last 36 months of monthly price behavior for drift and volatility, then runs 600 deterministic simulations from ${firstForecast} through ${lastForecast}. The chart shows the 10th, 50th, and 90th percentile paths.</p>
+    <p>The model starts from the last actual observation in ${historicalMonths.at(-1)} for ${selectedCountryLabel} ${appState.steelType} at ${lastActual.toFixed(0)} ${forecastBundle.unit}, uses the last 36 months of monthly price behavior for drift and volatility, then runs 600 deterministic simulations from ${firstForecast} through ${lastForecast}. The chart shows the 10th, 50th, and 90th percentile paths.</p>
   `;
 
   drawLineChart({
@@ -1491,6 +1994,33 @@ function renderForecast() {
       </tr>
     `)
     .join("");
+}
+
+function renderSteelWiki(selectedGrade = steelWikiSelect.value || "HRC") {
+  const wiki = steelWikiData[selectedGrade] || steelWikiData.HRC;
+  steelWikiSelect.value = selectedGrade;
+
+  document.querySelector("#steelWikiHero").innerHTML = `
+    <p class="section-label">Selected Grade</p>
+    <h3>${wiki.title}</h3>
+    <p>${wiki.summary}</p>
+  `;
+
+  document.querySelector("#steelWikiDefinition").innerHTML = `
+    <p>${wiki.definition}</p>
+  `;
+
+  document.querySelector("#steelWikiProduction").innerHTML = `
+    <ul>${wiki.production.map((item) => `<li>${item}</li>`).join("")}</ul>
+  `;
+
+  document.querySelector("#steelWikiApplications").innerHTML = `
+    <ul>${wiki.applications.map((item) => `<li>${item}</li>`).join("")}</ul>
+  `;
+
+  document.querySelector("#steelWikiDrivers").innerHTML = `
+    <ul>${wiki.drivers.map((item) => `<li>${item}</li>`).join("")}</ul>
+  `;
 }
 
 function renderSensitivitySection() {
@@ -1914,6 +2444,15 @@ function readableLabel(label) {
   return label.replace(/([A-Z])/g, " $1").trim();
 }
 
+function getCountryFlagMarkup(country, label) {
+  const code = countryFlagCodes[country];
+  if (!code) {
+    return "";
+  }
+
+  return `<img class="country-flag" src="https://flagcdn.com/48x36/${code.toLowerCase()}.png" alt="${label} flag">`;
+}
+
 function getFinancialYears() {
   return Array.from(
     new Set(
@@ -1945,12 +2484,20 @@ function init() {
   renderMapCountryList();
   initCountryNavigation();
   initControls();
+  renderHeroTicker();
+  renderHeroCostTicker();
+  renderOfficeTimes();
+  if (officeTimeIntervalId) {
+    clearInterval(officeTimeIntervalId);
+  }
+  officeTimeIntervalId = setInterval(renderOfficeTimes, 60000);
   setCountryFocus(appState.selectedCountry);
   renderPriceSection();
   renderCostDrivers();
   renderSupplyDemand();
   renderRegionalDelta();
   renderForecast();
+  renderSteelWiki("HRC");
   renderSensitivitySection();
   renderHeadlines();
   loadLiveHeadlines();

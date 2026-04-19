@@ -26,34 +26,73 @@
         <button class="nav-link" type="button" data-target="sensitivity">Industry Sensitivity</button>
         <button class="nav-link" type="button" data-target="headlines">Headlines</button>
         <button class="nav-link" type="button" data-target="financials">Financials</button>
+        <button class="nav-link" type="button" data-target="wiki">Steel Wiki</button>
+      </div>
+      <div class="nav-footer">
+        <a class="nav-about-link" href="https://www.appliedvaluegroup.com/" target="_blank" rel="noreferrer">About Applied Value</a>
       </div>
     </aside>
 
     <div class="content-shell">
-    <section class="hero app-view is-active" data-view="home">
+    <section class="hero is-active">
       <div class="hero-copy">
-        <div class="hero-brandmark">
-          <img
-            src="https://static.wixstatic.com/media/db7ee3_665546242ffa4ab3b330ba4a7e1c1aad~mv2.png/v1/fill/w_272,h_77,al_c,q_85,enc_avif,quality_auto/db7ee3_665546242ffa4ab3b330ba4a7e1c1aad~mv2.png"
-            alt="Applied Value Group logo"
-          >
+        <div class="hero-brandrow">
+          <div class="hero-brandmark">
+            <img
+              src="https://static.wixstatic.com/media/db7ee3_665546242ffa4ab3b330ba4a7e1c1aad~mv2.png/v1/fill/w_272,h_77,al_c,q_85,enc_avif,quality_auto/db7ee3_665546242ffa4ab3b330ba4a7e1c1aad~mv2.png"
+              alt="Applied Value Group logo"
+            >
+          </div>
+          <div class="hero-office-time" aria-label="City local times">
+            <div class="hero-office-time-track" id="heroOfficeTimeTrack">
+              <div class="hero-office-time-item"><span class="hero-office-time-city">Boston</span><span class="hero-office-time-value">--:--</span></div>
+              <div class="hero-office-time-item"><span class="hero-office-time-city">New York</span><span class="hero-office-time-value">--:--</span></div>
+              <div class="hero-office-time-item"><span class="hero-office-time-city">Chicago</span><span class="hero-office-time-value">--:--</span></div>
+              <div class="hero-office-time-item"><span class="hero-office-time-city">Miami</span><span class="hero-office-time-value">--:--</span></div>
+              <div class="hero-office-time-item"><span class="hero-office-time-city">Stockholm</span><span class="hero-office-time-value">--:--</span></div>
+              <div class="hero-office-time-item"><span class="hero-office-time-city">Shanghai</span><span class="hero-office-time-value">--:--</span></div>
+            </div>
+          </div>
         </div>
-        <div class="hero-image-strip" aria-label="Steel industry image gallery">
-          <div class="steel-visual steel-coil" aria-label="Steel coil image">
+        <div class="hero-home-gallery" id="homeHeroGallery" aria-label="Steel industry image gallery">
+          <div class="hero-home-gallery-item">
             <img src="hero-coil-generated.png" alt="Steel coils">
           </div>
-          <div class="steel-visual steel-plate" aria-label="Steel plate image">
+          <div class="hero-home-gallery-item">
             <img src="hero-plate-generated.png" alt="Steel plates">
           </div>
-          <div class="steel-visual steel-pipe" aria-label="Steel pipe image">
+          <div class="hero-home-gallery-item">
             <img src="hero-pipe-generated.png" alt="Steel pipes and sections">
           </div>
         </div>
+        <div class="hero-ticker" aria-label="Latest steel price ticker">
+          <div class="hero-ticker-track" id="heroTickerTrack"></div>
+        </div>
+        <div class="hero-ticker hero-ticker-secondary" aria-label="Latest steel cost driver ticker">
+          <div class="hero-ticker-track" id="heroCostTickerTrack"></div>
+        </div>
       </div>
       <div class="hero-panel">
-        <div class="hero-stat"><span>Tracked markets</span><strong>13</strong></div>
-        <div class="hero-stat"><span>Steel grades</span><strong>12</strong></div>
-        <div class="hero-stat"><span>Forecast horizon</span><strong>2027</strong></div>
+        <div class="hero-stat hero-stat-summary">
+          <span>Coverage</span>
+          <div class="hero-stat-grid">
+            <div class="hero-stat-chip">
+              <small>Tracked markets</small>
+              <strong>13</strong>
+              <em>Global countries</em>
+            </div>
+            <div class="hero-stat-chip">
+              <small>Steel grades</small>
+              <strong>12</strong>
+              <em>Flat, long, specialty</em>
+            </div>
+            <div class="hero-stat-chip">
+              <small>Forecast horizon</small>
+              <strong>2027</strong>
+              <em>Monthly outlook</em>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -214,6 +253,9 @@
             <h2>Supply & Demand Dynamics</h2>
           </div>
         </div>
+        <div class="controls compact-controls">
+          <label>Country<select id="supplyCountrySelect"></select></label>
+        </div>
         <div class="mini-tag">Capacity, utilization, orders</div>
         <div class="dynamics-grid" id="dynamicsCards"></div>
         <div class="selection-detail" id="supplyDemandDetail"></div>
@@ -287,6 +329,37 @@
             </thead>
             <tbody id="forecastMonthTableBody"></tbody>
           </table>
+        </div>
+      </section>
+
+      <section class="card section-view app-view" data-view="wiki">
+        <div class="section-topbar">
+          <div>
+            <p class="section-label">Reference</p>
+            <h2>Steel Wiki</h2>
+          </div>
+        </div>
+        <div class="controls compact-controls">
+          <label>Steel grade<select id="steelWikiSelect"></select></label>
+        </div>
+        <div class="selection-detail" id="steelWikiHero"></div>
+        <div class="wiki-grid">
+          <div class="selection-detail wiki-card">
+            <p class="section-label">Definition</p>
+            <div id="steelWikiDefinition"></div>
+          </div>
+          <div class="selection-detail wiki-card">
+            <p class="section-label">Production Route</p>
+            <div id="steelWikiProduction"></div>
+          </div>
+          <div class="selection-detail wiki-card">
+            <p class="section-label">Typical Applications</p>
+            <div id="steelWikiApplications"></div>
+          </div>
+          <div class="selection-detail wiki-card">
+            <p class="section-label">Price Drivers</p>
+            <div id="steelWikiDrivers"></div>
+          </div>
         </div>
       </section>
 

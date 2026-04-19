@@ -9,7 +9,7 @@
 <style type="text/css">
 .country {
 	opacity:1;
-	fill:#444444;
+	fill:#d8d0c2;
 	fill-opacity:1;
 	fill-rule:evenodd;
 	stroke:none;
